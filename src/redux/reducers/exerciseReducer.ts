@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface ExerciseEntry {
   exercise: string;
+  duration: number;
   caloriesBurned: number;
 }
 
@@ -17,11 +18,15 @@ const exerciseSlice = createSlice({
   name: 'exercise',
   initialState,
   reducers: {
-    addExercise: (state, action: PayloadAction<ExerciseEntry>) => {
+    addExerciseEntry: (state, action: PayloadAction<ExerciseEntry>) => {
       state.entries.push(action.payload);
     },
+    removeExerciseEntry: (state, action: PayloadAction<number>) => {
+      state.entries.splice(action.payload, 1);
+    },
+    // Add any other existing reducers here
   },
 });
 
-export const { addExercise } = exerciseSlice.actions;
+export const { addExerciseEntry, removeExerciseEntry } = exerciseSlice.actions;
 export default exerciseSlice.reducer;

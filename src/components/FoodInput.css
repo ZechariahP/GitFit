@@ -6,6 +6,12 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 input[type='number'] {
-  -moz-appearance: textfield;
   appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/* Error message styling */
+.error {
+  color: red;
+  margin-bottom: 10px;
 }

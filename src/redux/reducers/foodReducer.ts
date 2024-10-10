@@ -21,11 +21,15 @@ const foodSlice = createSlice({
   name: 'food',
   initialState,
   reducers: {
-    addFood: (state, action: PayloadAction<FoodEntry>) => {
+    addFoodEntry: (state, action: PayloadAction<FoodEntry>) => {
       state.entries.push(action.payload);
     },
+    removeFoodEntry: (state, action: PayloadAction<number>) => {
+      state.entries.splice(action.payload, 1);
+    },
+    // Add any other existing reducers here
   },
 });
 
-export const { addFood } = foodSlice.actions;
+export const { addFoodEntry, removeFoodEntry } = foodSlice.actions;
 export default foodSlice.reducer;

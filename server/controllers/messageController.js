@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { calculateBMR } = require('../../utils/bmrCalculator.cjs');
 
 const users = []; // In-memory user storage for simplicity. Use a database in production.
 
@@ -8,10 +9,10 @@ const getMessage = (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { firstName, email, password, dob, height, weight } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+  if (!firstName || !email || !password || !dob || !height || !weight) {
+    return res.status(400).json({ message: 'First name, email, password, date of birth, height, and weight are required' });
   }
 
   const userExists = users.find(user => user.email === email);
@@ -21,7 +22,12 @@ const registerUser = async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = { email, password: hashedPassword };
+
+  // Calculate BMR
+  const bmr = calculateBMR(height, weight, dob);
+
+  // Save user to mock database
+  const newUser = { firstName, email, password: hashedPassword, dob, height, weight, bmr };
   users.push(newUser);
 
   res.status(201).json({ message: 'User registered successfully', user: newUser });
@@ -40,39 +46,19 @@ const loginUser = async (req, res) => {
     return res.status(400).json({ message: 'Invalid credentials' });
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, user.password);
 
-  if (!isPasswordValid) {
+  if (!isMatch) {
     return res.status(400).json({ message: 'Invalid credentials' });
   }
 
-  const accessToken = jwt.sign({ email: user.email }, 'your_jwt_secret', { expiresIn: '15m' });
-  const refreshToken = jwt.sign({ email: user.email }, 'your_jwt_refresh_secret', { expiresIn: '7d' });
+  const token = jwt.sign({ id: user.email }, 'your_jwt_secret', { expiresIn: '1h' });
 
-  res.status(200).json({ accessToken, refreshToken });
+  res.status(200).json({ message: 'Login successful', token, user });
 };
 
 const refreshToken = (req, res) => {
-  const { token } = req.body;
-
-  if (!token) {
-    return res.status(400).json({ message: 'Token is required' });
-  }
-
-  jwt.verify(token, 'your_jwt_refresh_secret', (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid token' });
-    }
-
-    const accessToken = jwt.sign({ email: user.email }, 'your_jwt_secret', { expiresIn: '15m' });
-
-    res.status(200).json({ accessToken });
-  });
+  res.status(200).json({ message: 'Token refreshed' });
 };
 
-module.exports = {
-  getMessage,
-  registerUser,
-  loginUser,
-  refreshToken,
-};
+module.exports = { getMessage, registerUser, loginUser, refreshToken };
