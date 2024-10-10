@@ -34,7 +34,7 @@ const ProgressTracker: React.FC = () => {
         const date = new Date(selectedWeek);
         date.setDate(selectedWeek.getDate() + i);
         return date;
-      }).filter(filterWeek);
+      });
     } else if (filter === 'month' && selectedMonth) {
       const startOfMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
       const endOfMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
@@ -108,13 +108,14 @@ const ProgressTracker: React.FC = () => {
 
   const filterWeek = (date: Date) => {
     const today = new Date();
-    const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(today.getDate() - 7);
-    return date < today && date >= sevenDaysAgo;
+    today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+    const dayDifference = Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24));
+    return dayDifference % 7 === 0 && date < today;
   };
 
   const filterDate = (date: Date) => {
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
     return date < today;
   };
 
