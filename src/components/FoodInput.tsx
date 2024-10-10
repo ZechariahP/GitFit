@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Autosuggest from 'react-autosuggest';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { addFoodEntry } from '../redux/reducers/foodReducer';
 import { fetchFoodData, fetchFoodSuggestions } from '../services/foodService';
 import './FoodInput.css';
@@ -15,6 +17,7 @@ const FoodInput: React.FC = () => {
   const [carbs, setCarbs] = useState('');
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
+  const [entryDate, setEntryDate] = useState(new Date());
   const dispatch = useDispatch();
 
   const handleAddFood = async () => {
@@ -34,7 +37,8 @@ const FoodInput: React.FC = () => {
           fat: foodItem.fat || 0,
           protein: foodItem.protein || 0,
           sodium: foodItem.sodium || 0,
-          carbs: foodItem.carbs || 0
+          carbs: foodItem.carbs || 0,
+          date: entryDate.toISOString().split('T')[0]
         }));
 
         // Clear the input fields
@@ -46,6 +50,7 @@ const FoodInput: React.FC = () => {
         setCarbs('');
         setAmount('');
         setError('');
+        setEntryDate(new Date());
       } else {
         console.error('No food data found');
         setError('No food data found. Please try again.');
@@ -64,7 +69,8 @@ const FoodInput: React.FC = () => {
       fat: Number(fat),
       protein: Number(protein),
       sodium: Number(sodium),
-      carbs: Number(carbs)
+      carbs: Number(carbs),
+      date: entryDate.toISOString().split('T')[0]
     };
     const existingEntries = JSON.parse(localStorage.getItem('manualFoodEntries') || '[]');
     existingEntries.push(manualFoodEntry);
@@ -80,6 +86,7 @@ const FoodInput: React.FC = () => {
     setSodium('');
     setCarbs('');
     setError('');
+    setEntryDate(new Date());
   };
 
   const onSuggestionsFetchRequested = async ({ value }: { value: string }) => {
@@ -122,6 +129,11 @@ const FoodInput: React.FC = () => {
         renderSuggestion={renderSuggestion}
         inputProps={inputProps}
       />
+      <DatePicker
+        selected={entryDate}
+        onChange={(date: Date | null) => date && setEntryDate(date)}
+        dateFormat="yyyy-MM-dd"
+      />
       <button onClick={handleAddFood}>Add Food from API</button>
       <div>
         <h3>Manual Entry</h3>
@@ -132,7 +144,12 @@ const FoodInput: React.FC = () => {
         <input type="number" className="no-spinner" value={protein} onChange={(e) => setProtein(e.target.value)} placeholder="Protein (g)" />
         <input type="number" className="no-spinner" value={sodium} onChange={(e) => setSodium(e.target.value)} placeholder="Sodium (mg)" />
         <input type="number" className="no-spinner" value={carbs} onChange={(e) => setCarbs(e.target.value)} placeholder="Carbs (g)" />
-        <button onClick={handleManualAddFood}>Add Manual Food</button>
+        <DatePicker
+          selected={entryDate}
+          onChange={(date: Date | null) => date && setEntryDate(date)}
+          dateFormat="yyyy-MM-dd"
+        />
+        <button onClick={handleManualAddFood}>Add Food</button>
       </div>
     </div>
   );

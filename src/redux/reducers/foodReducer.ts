@@ -3,10 +3,11 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface FoodEntry {
   food: string;
   calories: number;
-  fat?: number;
-  protein?: number;
-  sodium?: number;
-  carbs?: number;
+  fat: number;
+  protein: number;
+  sodium: number;
+  carbs: number;
+  date: string;
 }
 
 interface FoodState {

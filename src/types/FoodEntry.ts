@@ -5,5 +5,6 @@ export interface FoodEntry {
     protein: number;
     sodium: number;
     carbs: number;
+    date: string;
     }
       
