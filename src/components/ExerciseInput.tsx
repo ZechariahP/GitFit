@@ -4,54 +4,68 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { addExerciseEntry } from '../redux/reducers/exerciseReducer';
 
-const ExerciseInput: React.FC = () => {
+interface ExerciseEntry {
+  id: number;
+  exercise: string;
+  duration: number;
+  caloriesBurned: number;
+  date: string;
+}
+
+interface ExerciseInputProps {
+  exerciseEntries: ExerciseEntry[];
+  setExerciseEntries: (entries: ExerciseEntry[]) => void;
+  onAddExerciseEntry: (newEntry: ExerciseEntry) => void;
+}
+
+const ExerciseInput: React.FC<ExerciseInputProps> = ({ exerciseEntries, setExerciseEntries }) => {
   const [exercise, setExercise] = useState('');
-  const [duration, setDuration] = useState<number | null>(null);
-  const [caloriesBurned, setCaloriesBurned] = useState<number | null>(null);
+  const [duration, setDuration] = useState('');
+  const [caloriesBurned, setCaloriesBurned] = useState('');
   const [entryDate, setEntryDate] = useState(new Date());
   const dispatch = useDispatch();
 
-  const handleAddExercise = () => {
-    dispatch(addExerciseEntry({
-      exercise,
-      duration: duration ?? 0,
-      caloriesBurned: caloriesBurned ?? 0,
-      date: entryDate.toISOString().split('T')[0]
-    }));
-    // Clear the input fields
+  const handleAddExerciseEntry = () => {
+    const dateKey = entryDate.toISOString().split('T')[0];
+    const newEntry = {
+      id: Date.now(), // or any other unique identifier
+      exercise: exercise,
+      duration: parseFloat(duration),
+      caloriesBurned: parseFloat(caloriesBurned),
+      date: dateKey,
+    };
+    setExerciseEntries([...exerciseEntries, newEntry]);
+    dispatch(addExerciseEntry(newEntry));
     setExercise('');
-    setDuration(null);
-    setCaloriesBurned(null);
-    setEntryDate(new Date());
+    setDuration('');
+    setCaloriesBurned('');
   };
 
   return (
-    <div>
-      <h2>Exercise Input</h2>
+    <div className="exercise-input">
       <input
         type="text"
+        placeholder="Exercise"
         value={exercise}
         onChange={(e) => setExercise(e.target.value)}
-        placeholder="Exercise"
       />
       <input
-        type="number"
-        value={duration !== null ? duration : ''}
-        onChange={(e) => setDuration(e.target.value ? Number(e.target.value) : null)}
+        type="text"
         placeholder="Duration (minutes)"
+        value={duration}
+        onChange={(e) => setDuration(e.target.value)}
       />
       <input
-        type="number"
-        value={caloriesBurned !== null ? caloriesBurned : ''}
-        onChange={(e) => setCaloriesBurned(e.target.value ? Number(e.target.value) : null)}
+        type="text"
         placeholder="Calories Burned"
+        value={caloriesBurned}
+        onChange={(e) => setCaloriesBurned(e.target.value)}
       />
       <DatePicker
         selected={entryDate}
         onChange={(date: Date | null) => date && setEntryDate(date)}
-        dateFormat="yyyy-MM-dd"
       />
-      <button onClick={handleAddExercise}>Add Exercise</button>
+      <button onClick={handleAddExerciseEntry}>Add Exercise Entry</button>
     </div>
   );
 };

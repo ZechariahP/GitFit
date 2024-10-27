@@ -1,4 +1,5 @@
 export interface FoodEntry {
+    id: number;
     food: string;
     calories: number;
     fat: number;

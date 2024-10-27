@@ -1,11 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface ExerciseEntry {
-  exercise: string;
-  duration: number;
-  caloriesBurned: number;
-  date: string;
-}
+import { ExerciseEntry } from '../../types/ExerciseEntry';
 
 interface ExerciseState {
   entries: ExerciseEntry[];
@@ -19,15 +13,17 @@ const exerciseSlice = createSlice({
   name: 'exercise',
   initialState,
   reducers: {
+    setExerciseEntries: (state, action: PayloadAction<ExerciseEntry[]>) => {
+      state.entries = action.payload;
+    },
     addExerciseEntry: (state, action: PayloadAction<ExerciseEntry>) => {
-      state.entries.push(action.payload);
+      state.entries = [...state.entries, action.payload];
     },
     removeExerciseEntry: (state, action: PayloadAction<number>) => {
       state.entries.splice(action.payload, 1);
     },
-    // Add any other existing reducers here
   },
 });
 
-export const { addExerciseEntry, removeExerciseEntry } = exerciseSlice.actions;
+export const { setExerciseEntries, addExerciseEntry, removeExerciseEntry } = exerciseSlice.actions;
 export default exerciseSlice.reducer;

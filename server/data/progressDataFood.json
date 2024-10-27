@@ -1,0 +1,94 @@
+{
+  "2024-10-16": [
+    {
+      "id": 1729085390115,
+      "food": "rice",
+      "calories": 123,
+      "fat": 1,
+      "protein": 1,
+      "sodium": 1,
+      "carbs": 1,
+      "date": "2024-10-16"
+    },
+    {
+      "id": 1729086736760,
+      "food": "beans",
+      "calories": 111,
+      "fat": 1,
+      "protein": 1,
+      "sodium": 1,
+      "carbs": 1,
+      "date": "2024-10-16"
+    },
+    {
+      "id": 1729087744300,
+      "food": "chicken",
+      "calories": 11,
+      "fat": 11,
+      "protein": 1,
+      "sodium": 1,
+      "carbs": 1,
+      "date": "2024-10-16"
+    },
+    {
+      "id": 1729088574562,
+      "food": "can",
+      "calories": 11,
+      "fat": 1,
+      "protein": 1,
+      "sodium": 1,
+      "carbs": 1,
+      "date": "2024-10-16"
+    },
+    {
+      "id": 1729088645174,
+      "food": "rice",
+      "calories": 11111,
+      "fat": 1,
+      "protein": 1,
+      "sodium": 1,
+      "carbs": 1,
+      "date": "2024-10-16"
+    },
+    {
+      "id": 1729089234949,
+      "food": "tin",
+      "calories": 111,
+      "fat": 111,
+      "protein": 1,
+      "sodium": 1,
+      "carbs": 1,
+      "date": "2024-10-16"
+    },
+    {
+      "id": 1729090531097,
+      "food": "tina",
+      "calories": 111,
+      "fat": 11,
+      "protein": 1,
+      "sodium": 1,
+      "carbs": 1,
+      "date": "2024-10-16"
+    },
+    {
+      "id": 1729090988694,
+      "food": "gan",
+      "calories": 1,
+      "fat": 1,
+      "protein": 1,
+      "sodium": 1,
+      "carbs": 1,
+      "date": "2024-10-16"
+    },
+    {
+      "id": 1729091209354,
+      "food": "gg",
+      "calories": 1,
+      "fat": 1,
+      "protein": 1,
+      "sodium": 1,
+      "carbs": 1,
+      "date": "2024-10-16"
+    }
+  ]
+}

@@ -1,18 +1,27 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { updateBMR } from '../redux/reducers/bmrReducer';
 
-const BMRDisplay: React.FC = () => {
-  const [bmr, setBmr] = useState<string | null>(null);
+interface BMRDisplayProps {
+  bmr: number;
+}
+
+const BMRDisplay: React.FC<BMRDisplayProps> = () => {
+  const [localBmr, setLocalBmr] = useState<number>(0);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const bmrData = localStorage.getItem('bmr');
     if (bmrData) {
-      setBmr(bmrData);
+      const parsedBmr = parseFloat(bmrData);
+      setLocalBmr(parsedBmr);
+      dispatch(updateBMR(parsedBmr));
     }
-  }, []);
+  }, [dispatch]);
 
   return (
     <div>
-      {bmr ? <p>BMR: {bmr}</p> : <p>Loading BMR...</p>}
+      {localBmr !== null ? <p>BMR: {localBmr}</p> : <p>Loading BMR...</p>}
     </div>
   );
 };

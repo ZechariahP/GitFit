@@ -5,7 +5,7 @@ const { calculateBMR } = require('../../utils/bmrCalculator.cjs');
 const users = []; // In-memory user storage for simplicity. Use a database in production.
 
 const getMessage = (req, res) => {
-  res.send('Hello from the backend!');
+  res.json('Hello from the backend!');
 };
 
 const registerUser = async (req, res) => {

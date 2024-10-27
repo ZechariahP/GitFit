@@ -29,8 +29,11 @@ const bmrSlice = createSlice({
       state.weight = action.payload;
       state.bmr = 10 * state.weight + 6.25 * state.height - 5 * state.age + 5; // Update BMR
     },
+    updateBMR: (state, action: PayloadAction<number>) => {
+      state.bmr = action.payload;
+    },
   },
 });
 
-export const { setBMR, updateWeight } = bmrSlice.actions;
+export const { setBMR, updateWeight, updateBMR } = bmrSlice.actions;
 export default bmrSlice.reducer;
