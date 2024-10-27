@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { RootState } from '../redux/store';
-import { removeFoodEntry, addFoodEntry } from '../redux/reducers/foodReducer';
-import { removeExerciseEntry, addExerciseEntry } from '../redux/reducers/exerciseReducer';
 import { ExerciseEntry } from '../types/ExerciseEntry';
 import { FoodEntry } from '../types/FoodEntry';
-import ExerciseInput from './ExerciseInput';
-import FoodInput from './FoodInput';
 
 interface ProgressTrackerProps {
   date: string;
@@ -18,25 +14,22 @@ interface ProgressTrackerProps {
   onRemoveExerciseEntry: (id: number) => void;
 }
 
-const ProgressTracker: React.FC<ProgressTrackerProps> = ({ foodEntries, onRemoveExerciseEntry }) => {
-  const dispatch = useDispatch();
+const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, exerciseEntries, onRemoveFoodEntry, onRemoveExerciseEntry }) => {
   const bmr = useSelector((state: RootState) => state.bmr.bmr);
 
-  const [currentDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [currentDayEntries, setCurrentDayEntries] = useState<{ foodEntries: FoodEntry[], exerciseEntries: ExerciseEntry[] }>({ foodEntries: [], exerciseEntries: [] });
+  const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
   const [filter, setFilter] = useState<'week' | 'month' | 'date'>('week');
   const [pastEntries, setPastEntries] = useState<{ date: Date, foodEntries: FoodEntry[], exerciseEntries: ExerciseEntry[] }[]>([]);
-  const [netCalories, setNetCalories] = useState<number>(0);
-  const [currentDayEntries, setCurrentDayEntries] = useState<{ foodEntries: FoodEntry[], exerciseEntries: ExerciseEntry[] }>({ foodEntries: [], exerciseEntries: [] });
 
   useEffect(() => {
-    // Fetch progress data for the current date
     const fetchProgressData = async () => {
       try {
-        const foodResponse = await fetch(`http://localhost:5000/api/progress/food/${currentDate}`);
-        const exerciseResponse = await fetch(`http://localhost:5000/api/progress/exercise/${currentDate}`);
+        const foodResponse = await fetch(`http://localhost:5000/api/progress/food/${date}`);
+        const exerciseResponse = await fetch(`http://localhost:5000/api/progress/exercise/${date}`);
 
         if (!foodResponse.ok || !exerciseResponse.ok) {
           throw new Error('Failed to fetch progress data');
@@ -46,23 +39,29 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ foodEntries, onRemove
         const exerciseData = await exerciseResponse.json();
 
         setCurrentDayEntries({
-          foodEntries: foodData,
-          exerciseEntries: exerciseData,
+          foodEntries: Array.isArray(foodData) ? foodData : [],
+          exerciseEntries: Array.isArray(exerciseData) ? exerciseData : [],
         });
       } catch (error) {
-        console.error('Error fetching progress data:', error);
+        if (error instanceof Error) {
+          if (error instanceof Error) {
+            setError(error.message);
+          } else {
+            setError('An unknown error occurred');
+          }
+        } else {
+          setError('An unknown error occurred');
+        }
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       }
     };
 
     fetchProgressData();
-  }, [currentDate]);
-
-  useEffect(() => {
-    const foodTotals = calculateFoodTotals(currentDayEntries.foodEntries);
-    const exerciseTotals = calculateExerciseTotals(currentDayEntries.exerciseEntries);
-    const netGainLoss = calculateNetGainLoss(foodTotals.calories, exerciseTotals.caloriesBurned, bmr);
-    setNetCalories(netGainLoss);
-  }, [currentDayEntries, bmr]);
+  }, [date, foodEntries, exerciseEntries]);
 
   useEffect(() => {
     fetchPastEntries();
@@ -96,8 +95,8 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ foodEntries, onRemove
   const fetchEntriesForDateRange = async (dates: Date[]) => {
     return await Promise.all(dates.map(async (date) => {
       try {
-        const foodResponse = await fetch(`http://localhost:5000/api/progress/food/${date.toISOString().split('T')[0]}`);
-        const exerciseResponse = await fetch(`http://localhost:5000/api/progress/exercise/${date.toISOString().split('T')[0]}`);
+        const foodResponse = await fetch(`http://localhost:5000/api/progress/food/${date}`);
+        const exerciseResponse = await fetch(`http://localhost:5000/api/progress/exercise/${date}`);
 
         if (!foodResponse.ok || !exerciseResponse.ok) {
           if (foodResponse.status === 404 || exerciseResponse.status === 404) {
@@ -117,12 +116,37 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ foodEntries, onRemove
     }));
   };
 
-  const handleRemoveFoodEntry = (id: number) => {
-    const updatedFoodEntries = foodEntries.filter(entry => entry.id !== id);
-    dispatch(removeFoodEntry(id));
-    localStorage.setItem('foodEntries', JSON.stringify(updatedFoodEntries));
+  const handleRemoveFoodEntry = async (id: number) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/progress/food/${date}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete food entry');
+      }
+
+      onRemoveFoodEntry(id);
+    } catch (error) {
+      console.error('Error deleting food entry:', error);
+    }
   };
 
+  const handleRemoveExerciseEntry = async (id: number) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/progress/exercise/${date}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete exercise entry');
+      }
+
+      onRemoveExerciseEntry(id);
+    } catch (error) {
+      console.error('Error deleting exercise entry:', error);
+    }
+  };
 
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
@@ -208,7 +232,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ foodEntries, onRemove
       <div style={{ flex: 1 }}>
         <h2>Progress Tracker</h2>
         <div>
-          <h3>Current Day: {currentDate}</h3>
+          <h3>Current Day: {date}</h3>
           <h4>Net Gain/Loss</h4>
           <p>Net Calories: {currentNetCalories}</p>
           <h4>Food Entries</h4>
@@ -264,7 +288,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ foodEntries, onRemove
                   <td>{entry.duration}</td>
                   <td>{entry.caloriesBurned}</td>
                   <td>
-                    <button onClick={() => onRemoveExerciseEntry(entry.id || 0)}>Remove</button>
+                    <button onClick={() => handleRemoveExerciseEntry(entry.id || 0)}>Remove</button>
                   </td>
                 </tr>
               ))}
@@ -374,7 +398,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ foodEntries, onRemove
                       <td>{exerciseEntry.duration}</td>
                       <td>{exerciseEntry.caloriesBurned}</td>
                       <td>
-                        <button onClick={() => onRemoveExerciseEntry(exerciseEntry.id || 0)}>Remove</button>
+                        <button onClick={() => handleRemoveExerciseEntry(exerciseEntry.id || 0)}>Remove</button>
                       </td>
                     </tr>
                   ))}

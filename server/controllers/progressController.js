@@ -1,151 +1,67 @@
-const fs = require('fs');
-const path = require('path');
-
-// Paths to the JSON files where progress data is stored
-const foodDataFilePath = path.join(__dirname, '../data/progressDataFood.json');
-const exerciseDataFilePath = path.join(__dirname, '../data/progressDataExercise.json');
+const { neon } = require('@neondatabase/serverless');
+const sql = neon(process.env.DATABASE_URL);
 
 // Get food progress data by date
-const getFoodProgressByDate = (req, res) => {
+const getFoodProgressByDate = async (req, res) => {
   const { date } = req.params;
 
-  fs.readFile(foodDataFilePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading food data file:', err);
-      return res.status(500).json({ message: 'Server error' });
-    }
-
-    const progressData = JSON.parse(data);
-    const foodEntries = progressData[date] || [];
-    res.json(foodEntries);
-  });
+  try {
+    const result = await sql`SELECT * FROM food_progress WHERE date = ${date}`;
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching food progress data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
 // Get exercise progress data by date
-const getExerciseProgressByDate = (req, res) => {
+const getExerciseProgressByDate = async (req, res) => {
   const { date } = req.params;
 
-  fs.readFile(exerciseDataFilePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading exercise data file:', err);
-      return res.status(500).json({ message: 'Server error' });
-    }
-
-    const progressData = JSON.parse(data);
-    const exerciseEntries = progressData[date] || [];
-    res.json(exerciseEntries);
-  });
-};
-
-// Add progress entry
-const addProgressEntry = (req, res) => {
-  const { date, foodEntries, exerciseEntries } = req.body;
-
-  if (foodEntries && foodEntries.length > 0) {
-    fs.readFile(foodDataFilePath, 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading food data file:', err);
-        return res.status(500).json({ message: 'Server error' });
-      }
-
-      const progressData = JSON.parse(data);
-      if (!progressData[date]) {
-        progressData[date] = [];
-      }
-
-      progressData[date].push(...foodEntries);
-
-      fs.writeFile(foodDataFilePath, JSON.stringify(progressData, null, 2), (err) => {
-        if (err) {
-          console.error('Error writing to food data file:', err);
-          return res.status(500).json({ message: 'Server error' });
-        }
-      });
-    });
+  try {
+    const result = await sql`SELECT * FROM exercise_progress WHERE date = ${date}`;
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching exercise progress data:', error);
+    res.status(500).json({ message: 'Server error' });
   }
+};
 
-  if (exerciseEntries && exerciseEntries.length > 0) {
-    fs.readFile(exerciseDataFilePath, 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading exercise data file:', err);
-        return res.status(500).json({ message: 'Server error' });
-      }
+// Add food progress entry
+const addFoodProgressEntry = async (req, res) => {
+  const { date, foodEntries } = req.body;
 
-      const progressData = JSON.parse(data);
-      if (!progressData[date]) {
-        progressData[date] = [];
-      }
-
-      progressData[date].push(...exerciseEntries);
-
-      fs.writeFile(exerciseDataFilePath, JSON.stringify(progressData, null, 2), (err) => {
-        if (err) {
-          console.error('Error writing to exercise data file:', err);
-          return res.status(500).json({ message: 'Server error' });
-        }
-      });
-    });
+  try {
+    const result = await sql`
+      INSERT INTO food_progress (date, food, calories, fat, protein, sodium, carbs)
+      VALUES ${sql(foodEntries.map(entry => [date, entry.foodName, entry.calories, entry.fat, entry.protein, entry.sodium, entry.carbs]))}
+      RETURNING *`;
+    res.json(result);
+  } catch (error) {
+    console.error('Error adding food progress entry:', error);
+    res.status(500).json({ message: 'Server error' });
   }
-
-  res.status(200).json({ message: 'Progress entry added successfully' });
 };
 
-// Delete food entry by ID
-const deleteFoodEntry = (req, res) => {
-  const { date, id } = req.params;
+// Add exercise progress entry
+const addExerciseProgressEntry = async (req, res) => {
+  const { date, exerciseEntries } = req.body;
 
-  fs.readFile(foodDataFilePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading food data file:', err);
-      return res.status(500).json({ message: 'Server error' });
-    }
-
-    const progressData = JSON.parse(data);
-    if (progressData[date]) {
-      progressData[date] = progressData[date].filter(entry => entry.id !== parseInt(id, 10));
-    }
-
-    fs.writeFile(foodDataFilePath, JSON.stringify(progressData, null, 2), (err) => {
-      if (err) {
-        console.error('Error writing to food data file:', err);
-        return res.status(500).json({ message: 'Server error' });
-      }
-
-      res.status(200).json({ message: 'Food entry deleted successfully' });
-    });
-  });
-};
-
-// Delete exercise entry by ID
-const deleteExerciseEntry = (req, res) => {
-  const { date, id } = req.params;
-
-  fs.readFile(exerciseDataFilePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading exercise data file:', err);
-      return res.status(500).json({ message: 'Server error' });
-    }
-
-    const progressData = JSON.parse(data);
-    if (progressData[date]) {
-      progressData[date] = progressData[date].filter(entry => entry.id !== parseInt(id, 10));
-    }
-
-    fs.writeFile(exerciseDataFilePath, JSON.stringify(progressData, null, 2), (err) => {
-      if (err) {
-        console.error('Error writing to exercise data file:', err);
-        return res.status(500).json({ message: 'Server error' });
-      }
-
-      res.status(200).json({ message: 'Exercise entry deleted successfully' });
-    });
-  });
+  try {
+    const result = await sql`
+      INSERT INTO exercise_progress (date, exercise, duration, caloriesBurned)
+      VALUES ${sql(exerciseEntries.map(entry => [date, entry.exercise, entry.duration, entry.caloriesBurned]))}
+      RETURNING *`;
+    res.json(result);
+  } catch (error) {
+    console.error('Error adding exercise progress entry:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
 module.exports = {
   getFoodProgressByDate,
   getExerciseProgressByDate,
-  addProgressEntry,
-  deleteFoodEntry,
-  deleteExerciseEntry,
+  addFoodProgressEntry,
+  addExerciseProgressEntry,
 };
