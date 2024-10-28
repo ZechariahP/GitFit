@@ -8,7 +8,7 @@ interface FoodInputProps {
 }
 
 const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry }) => {
-  const [foodName, setFoodName] = useState('');
+  const [food, setFood] = useState('');
   const [calories, setCalories] = useState('');
   const [fat, setFat] = useState('');
   const [protein, setProtein] = useState('');
@@ -16,11 +16,12 @@ const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry }) => {
   const [carbs, setCarbs] = useState('');
   const [entryDate, setEntryDate] = useState<Date | null>(new Date());
 
-  const handleAddFoodEntry = async () => {
+  const handleAddFoodEntry = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission
     const dateKey = entryDate ? entryDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
     const newEntry: FoodEntry = {
       id: Date.now(), // or any other unique identifier
-      foodName,
+      food,
       calories: parseFloat(calories),
       fat: parseFloat(fat),
       protein: parseFloat(protein),
@@ -29,13 +30,15 @@ const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry }) => {
       date: dateKey,
     };
 
+    console.log('New Food Entry:', newEntry); // Debugging log
+
     try {
       const response = await fetch('http://localhost:5000/api/progress/food', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ date: dateKey, foodEntries: [newEntry] }),
+        body: JSON.stringify(newEntry),
       });
 
       if (!response.ok) {
@@ -45,7 +48,7 @@ const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry }) => {
       const data = await response.json();
       console.log('Food entry added successfully:', data);
       onAddFoodEntry(newEntry);
-      setFoodName('');
+      setFood('');
       setCalories('');
       setFat('');
       setProtein('');
@@ -57,8 +60,8 @@ const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry }) => {
   };
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); handleAddFoodEntry(); }}>
-      <input type="text" value={foodName} onChange={(e) => setFoodName(e.target.value)} placeholder="Food Name" required />
+    <form onSubmit={handleAddFoodEntry}>
+      <input type="text" value={food} onChange={(e) => setFood(e.target.value)} placeholder="Food Name" required />
       <input type="number" value={calories} onChange={(e) => setCalories(e.target.value)} placeholder="Calories" required />
       <input type="number" value={fat} onChange={(e) => setFat(e.target.value)} placeholder="Fat (g)" required />
       <input type="number" value={protein} onChange={(e) => setProtein(e.target.value)} placeholder="Protein (g)" required />

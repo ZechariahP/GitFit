@@ -6,6 +6,13 @@ import { RootState } from '../redux/store';
 import { ExerciseEntry } from '../types/ExerciseEntry';
 import { FoodEntry } from '../types/FoodEntry';
 
+const mapExerciseEntries = (entries: ExerciseEntry[]) => {
+  return entries.map(entry => ({
+    ...entry,
+    caloriesBurned: entry.calories_burned,
+  }));
+};
+
 interface ProgressTrackerProps {
   date: string;
   foodEntries: FoodEntry[];
@@ -24,7 +31,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
   const [filter, setFilter] = useState<'week' | 'month' | 'date'>('week');
   const [pastEntries, setPastEntries] = useState<{ date: Date, foodEntries: FoodEntry[], exerciseEntries: ExerciseEntry[] }[]>([]);
-
+  
   useEffect(() => {
     const fetchProgressData = async () => {
       try {
@@ -38,9 +45,11 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
         const foodData = await foodResponse.json();
         const exerciseData = await exerciseResponse.json();
 
+        const mappedExerciseEntries = mapExerciseEntries(exerciseData);
+
         setCurrentDayEntries({
-          foodEntries: Array.isArray(foodData) ? foodData : [],
-          exerciseEntries: Array.isArray(exerciseData) ? exerciseData : [],
+          foodEntries: foodData,
+          exerciseEntries: mappedExerciseEntries
         });
       } catch (error) {
         if (error instanceof Error) {
@@ -201,8 +210,8 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
     );
   };
 
-  const calculateExerciseTotals = (entries: ExerciseEntry[]) => {
-    return entries.reduce(
+  const calculateExerciseTotals = (exerciseEntries: ExerciseEntry[]) => {
+    return exerciseEntries.reduce(
       (totals, entry) => {
         totals.duration += entry.duration || 0;
         totals.caloriesBurned += entry.caloriesBurned || 0;
@@ -211,6 +220,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
       { duration: 0, caloriesBurned: 0 }
     );
   };
+
+console.log('exerciseEntries:', exerciseEntries);
+
 
   const calculateNetGainLoss = (foodCalories: number, exerciseCaloriesBurned: number, bmr: number) => {
     return foodCalories - exerciseCaloriesBurned - bmr;

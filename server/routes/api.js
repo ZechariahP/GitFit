@@ -101,11 +101,11 @@ router.get('/progress/food/:date', async (req, res) => {
 });
 
 router.post('/progress/food', async (req, res) => {
-  const { food, calories, fat, protein, sodium, carbs, date } = req.body;
+  const { date, food, calories, fat, protein, sodium, carbs } = req.body;
   try {
     const result = await sql`
-      INSERT INTO food_progress (food, calories, fat, protein, sodium, carbs, date) 
-      VALUES (${food}, ${calories}, ${fat}, ${protein}, ${sodium}, ${carbs}, ${date}) 
+      INSERT INTO food_progress (date, food, calories, fat, protein, sodium, carbs) 
+      VALUES (${date}, ${food}, ${calories}, ${fat}, ${protein}, ${sodium}, ${carbs}) 
       RETURNING *`;
     res.json(result[0]);
   } catch (error) {
@@ -138,11 +138,11 @@ router.get('/progress/exercise/:date', async (req, res) => {
 });
 
 router.post('/progress/exercise', async (req, res) => {
-  const { exercise, duration, caloriesBurned, date } = req.body;
+  const { date, exercise, duration, caloriesBurned,  } = req.body;
   try {
     const result = await sql`
-      INSERT INTO exercise_progress (exercise, duration, caloriesBurned, date) 
-      VALUES (${exercise}, ${duration}, ${caloriesBurned}, ${date}) 
+      INSERT INTO exercise_progress (date, exercise, duration, calories_burned) 
+      VALUES (${date}, ${exercise}, ${duration}, ${caloriesBurned}) 
       RETURNING *`;
     res.json(result[0]);
   } catch (error) {

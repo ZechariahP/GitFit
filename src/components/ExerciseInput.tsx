@@ -1,72 +1,76 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { addExerciseEntry } from '../redux/reducers/exerciseReducer';
-
-interface ExerciseEntry {
-  id: number;
-  exercise: string;
-  duration: number;
-  caloriesBurned: number;
-  date: string;
-}
+import { ExerciseEntry } from '../types/ExerciseEntry';
 
 interface ExerciseInputProps {
-  exerciseEntries: ExerciseEntry[];
-  setExerciseEntries: (entries: ExerciseEntry[]) => void;
-  onAddExerciseEntry: (newEntry: ExerciseEntry) => void;
+  onAddExerciseEntry: (entry: ExerciseEntry) => void;
 }
 
-const ExerciseInput: React.FC<ExerciseInputProps> = ({ exerciseEntries, setExerciseEntries }) => {
+const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry }) => {
   const [exercise, setExercise] = useState('');
   const [duration, setDuration] = useState('');
   const [caloriesBurned, setCaloriesBurned] = useState('');
-  const [entryDate, setEntryDate] = useState(new Date());
-  const dispatch = useDispatch();
+  const [entryDate, setEntryDate] = useState<Date | null>(new Date());
 
-  const handleAddExerciseEntry = () => {
-    const dateKey = entryDate.toISOString().split('T')[0];
-    const newEntry = {
+  const handleAddExerciseEntry = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission
+    const dateKey = entryDate ? entryDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    const newEntry: ExerciseEntry = {
       id: Date.now(), // or any other unique identifier
-      exercise: exercise,
+      exercise,
       duration: parseFloat(duration),
       caloriesBurned: parseFloat(caloriesBurned),
       date: dateKey,
     };
-    setExerciseEntries([...exerciseEntries, newEntry]);
-    dispatch(addExerciseEntry(newEntry));
-    setExercise('');
-    setDuration('');
-    setCaloriesBurned('');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/progress/exercise', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newEntry),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add exercise entry');
+      }
+
+      const data = await response.json();
+      console.log('Exercise entry added successfully:', data);
+      onAddExerciseEntry(data);
+    } catch (error) {
+      console.error('Error adding exercise entry:', error);
+    }
   };
 
   return (
-    <div className="exercise-input">
+    <form onSubmit={handleAddExerciseEntry}>
       <input
         type="text"
-        placeholder="Exercise"
         value={exercise}
         onChange={(e) => setExercise(e.target.value)}
+        placeholder="Enter exercise"
       />
       <input
-        type="text"
-        placeholder="Duration (minutes)"
+        type="number"
         value={duration}
         onChange={(e) => setDuration(e.target.value)}
+        placeholder="Enter duration (minutes)"
       />
       <input
-        type="text"
-        placeholder="Calories Burned"
+        type="number"
         value={caloriesBurned}
         onChange={(e) => setCaloriesBurned(e.target.value)}
+        placeholder="Enter calories burned"
       />
       <DatePicker
         selected={entryDate}
-        onChange={(date: Date | null) => date && setEntryDate(date)}
+        onChange={(date: Date | null) => setEntryDate(date)}
       />
-      <button onClick={handleAddExerciseEntry}>Add Exercise Entry</button>
-    </div>
+      <button type="submit">Add Exercise Entry</button>
+    </form>
   );
 };
 

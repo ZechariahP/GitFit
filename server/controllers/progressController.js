@@ -29,33 +29,39 @@ const getExerciseProgressByDate = async (req, res) => {
 
 // Add food progress entry
 const addFoodProgressEntry = async (req, res) => {
-  const { date, foodEntries } = req.body;
+  const { date, food, calories, fat, protein, sodium, carbs } = req.body;
+
+  // Validate the request payload
+  if (!date || !food) {
+    console.error('Invalid request payload:', req.body); // Debugging log
+    return res.status(400).json({ message: 'Invalid request payload' });
+  }
 
   try {
     const result = await sql`
       INSERT INTO food_progress (date, food, calories, fat, protein, sodium, carbs)
-      VALUES ${sql(foodEntries.map(entry => [date, entry.foodName, entry.calories, entry.fat, entry.protein, entry.sodium, entry.carbs]))}
+      VALUES (${date}, ${food}, ${calories}, ${fat}, ${protein}, ${sodium}, ${carbs})
       RETURNING *`;
-    res.json(result);
+    res.json(result[0]);
   } catch (error) {
     console.error('Error adding food progress entry:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
 
 // Add exercise progress entry
 const addExerciseProgressEntry = async (req, res) => {
-  const { date, exerciseEntries } = req.body;
+  const { date, exercise, duration, caloriesBurned } = req.body;
 
   try {
     const result = await sql`
       INSERT INTO exercise_progress (date, exercise, duration, caloriesBurned)
-      VALUES ${sql(exerciseEntries.map(entry => [date, entry.exercise, entry.duration, entry.caloriesBurned]))}
+      VALUES (${date}, ${exercise}, ${duration}, ${caloriesBurned})
       RETURNING *`;
-    res.json(result);
+    res.json(result[0]);
   } catch (error) {
     console.error('Error adding exercise progress entry:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
 

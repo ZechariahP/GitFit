@@ -2,6 +2,6 @@ export interface ExerciseEntry {
     id: number;
     exercise: string;
     duration: number;
-    caloriesBurned: number;
+    calories_burned: number;
     date: string;
     }
