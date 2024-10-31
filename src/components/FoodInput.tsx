@@ -5,9 +5,10 @@ import { FoodEntry } from '../types/FoodEntry';
 
 interface FoodInputProps {
   onAddFoodEntry: (entry: FoodEntry) => void;
+  userId: number; // Add userId prop
 }
 
-const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry }) => {
+const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry, userId }) => {
   const [food, setFood] = useState('');
   const [calories, setCalories] = useState('');
   const [fat, setFat] = useState('');
@@ -22,41 +23,22 @@ const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry }) => {
     const newEntry: FoodEntry = {
       id: Date.now(), // or any other unique identifier
       food,
-      calories: parseFloat(calories),
-      fat: parseFloat(fat),
-      protein: parseFloat(protein),
-      sodium: parseFloat(sodium),
-      carbs: parseFloat(carbs),
+      calories: parseInt(calories, 10),
+      fat: parseInt(fat, 10),
+      protein: parseInt(protein, 10),
+      sodium: parseInt(sodium, 10),
+      carbs: parseInt(carbs, 10),
       date: dateKey,
+      userId, // Include userId in the new entry
     };
-
-    console.log('New Food Entry:', newEntry); // Debugging log
-
-    try {
-      const response = await fetch('http://localhost:5000/api/progress/food', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newEntry),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add food entry');
-      }
-
-      const data = await response.json();
-      console.log('Food entry added successfully:', data);
-      onAddFoodEntry(newEntry);
-      setFood('');
-      setCalories('');
-      setFat('');
-      setProtein('');
-      setSodium('');
-      setCarbs('');
-    } catch (error) {
-      console.error('Error adding food entry:', error);
-    }
+    onAddFoodEntry(newEntry);
+    setFood('');
+    setCalories('');
+    setFat('');
+    setProtein('');
+    setSodium('');
+    setCarbs('');
+    setEntryDate(new Date());
   };
 
   return (

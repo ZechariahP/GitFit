@@ -7,12 +7,13 @@ import BMRDisplay from './BMRDisplay';
 
 const MainPage: React.FC = () => {
   const [message, setMessage] = useState('');
-  const [user, setUser] = useState<{ firstName: string, email: string } | null>(null);
+  const [user, setUser] = useState<{ id: number, firstName: string, email: string, weight?: number } | null>(null);
   const [date] = useState(new Date().toISOString().split('T')[0]);
   const [foodEntries, setFoodEntries] = useState<any[]>([]);
   const [exerciseEntries, setExerciseEntries] = useState<any[]>([]);
   const [bmr, setBmr] = useState<number | null>(null);
   const [loadingBmr, setLoadingBmr] = useState(true);
+  const [newWeight, setNewWeight] = useState<number | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,65 +26,152 @@ const MainPage: React.FC = () => {
     if (userData) {
       setUser(JSON.parse(userData));
     }
-
-    // Fetch BMR data from the server
-    fetch('http://localhost:5000/api/bmr')
-      .then(response => response.json())
-      .then(data => {
-        setBmr(data.bmr);
-        setLoadingBmr(false);
-      })
-      .catch(error => {
-        console.error('Error fetching BMR data:', error);
-        setLoadingBmr(false);
-      });
   }, []);
 
-  const handleRemoveFoodEntry = async (id: number) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/progress/food/${date}/${id}`, {
-        method: 'DELETE',
-      });
+  useEffect(() => {
+    if (user) {
+      fetch(`http://localhost:5000/api/bmr?email=${user.email}`)
+        .then(response => response.json())
+        .then(data => {
+          setBmr(data.bmr);
+          setLoadingBmr(false);
+        })
+        .catch(error => {
+          console.error('Error fetching BMR:', error);
+          setLoadingBmr(false);
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete food entry');
-      }
+      fetch(`http://localhost:5000/api/progress/food/${date}?userId=${user.id}`)
+        .then(response => response.json())
+        .then(data => setFoodEntries(data))
+        .catch(error => console.error('Error fetching food entries:', error));
 
-      setFoodEntries(foodEntries.filter(entry => entry.id !== id));
-    } catch (error) {
-      console.error('Error deleting food entry:', error);
+      fetch(`http://localhost:5000/api/progress/exercise/${date}?userId=${user.id}`)
+        .then(response => response.json())
+        .then(data => setExerciseEntries(data))
+        .catch(error => console.error('Error fetching exercise entries:', error));
     }
-  };
+  }, [user, date]);
 
-  const handleRemoveExerciseEntry = async (id: number) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/progress/exercise/${date}/${id}`, {
-        method: 'DELETE',
-      });
+  const handleWeightUpdate = async () => {
+    if (user && newWeight) {
+      try {
+        const response = await fetch('http://localhost:5000/api/update-weight', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: user.email, weight: newWeight }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete exercise entry');
+        if (!response.ok) {
+          throw new Error('Failed to update weight');
+        }
+
+        const data = await response.json();
+        setUser({ ...user, weight: newWeight });
+        setBmr(data.bmr); // Update BMR state with the new BMR value
+        setNewWeight(null);
+
+        // Fetch the updated BMR from the database
+        const bmrResponse = await fetch(`http://localhost:5000/api/bmr?email=${user.email}`);
+        if (!bmrResponse.ok) {
+          throw new Error('Failed to fetch updated BMR');
+        }
+        const bmrData = await bmrResponse.json();
+        setBmr(bmrData.bmr); // Update BMR state with the fetched BMR value
+      } catch (error) {
+        console.error('Error updating weight:', error);
       }
-
-      setExerciseEntries(exerciseEntries.filter(entry => entry.id !== id));
-    } catch (error) {
-      console.error('Error deleting exercise entry:', error);
     }
   };
 
   const handleLogout = () => {
-    // Clear user data from local storage
     localStorage.removeItem('user');
-    // Redirect to login page
+    setUser(null);
     navigate('/login');
   };
 
-  const handleAddFoodEntry = (newEntry: any) => {
-    setFoodEntries([...foodEntries, newEntry]);
+  const handleAddFoodEntry = async (newEntry: any) => {
+    if (user) {
+      try {
+        const response = await fetch('http://localhost:5000/api/progress/food', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...newEntry, userId: user.id }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to add food entry');
+        }
+
+        const data = await response.json();
+        setFoodEntries([...foodEntries, data]);
+      } catch (error) {
+        console.error('Error adding food entry:', error);
+      }
+    }
   };
 
-  const handleAddExerciseEntry = (newEntry: any) => {
-    setExerciseEntries([...exerciseEntries, newEntry]);
+  const handleAddExerciseEntry = async (newEntry: any) => {
+    if (user) {
+      try {
+        const response = await fetch('http://localhost:5000/api/progress/exercise', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...newEntry, userId: user.id }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to add exercise entry');
+        }
+
+        const data = await response.json();
+        setExerciseEntries([...exerciseEntries, data]);
+      } catch (error) {
+        console.error('Error adding exercise entry:', error);
+      }
+    }
+  };
+
+  const handleRemoveFoodEntry = async (id: number) => {
+    if (user) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/progress/food/${date}/${id}?userId=${user.id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to remove food entry');
+        }
+
+        setFoodEntries(foodEntries.filter(entry => entry.id !== id));
+      } catch (error) {
+        console.error('Error removing food entry:', error);
+      }
+    }
+  };
+
+  const handleRemoveExerciseEntry = async (id: number) => {
+    if (user) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/progress/exercise/${date}/${id}?userId=${user.id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to remove exercise entry');
+        }
+
+        setExerciseEntries(exerciseEntries.filter(entry => entry.id !== id));
+      } catch (error) {
+        console.error('Error removing exercise entry:', error);
+      }
+    }
   };
 
   return (
@@ -92,9 +180,20 @@ const MainPage: React.FC = () => {
       <p>{message}</p>
       {user && <p>Welcome, {user.firstName}!</p>}
       <button onClick={handleLogout}>Logout</button>
+      <div>
+        <label>
+          Update Weight (kg):
+          <input
+            type="number"
+            value={newWeight !== null ? newWeight : ''}
+            onChange={(e) => setNewWeight(Number(e.target.value))}
+          />
+        </label>
+        <button onClick={handleWeightUpdate}>Update Weight</button>
+      </div>
       {loadingBmr ? <p>Loading BMR...</p> : bmr !== null && <BMRDisplay bmr={bmr} />}
-      <FoodInput onAddFoodEntry={handleAddFoodEntry} />
-      <ExerciseInput onAddExerciseEntry={handleAddExerciseEntry} />
+      {user && <FoodInput onAddFoodEntry={handleAddFoodEntry} userId={user.id} />}
+      {user && <ExerciseInput onAddExerciseEntry={handleAddExerciseEntry} userId={user.id} />}
       <ProgressTracker 
         date={date} 
         foodEntries={foodEntries} 

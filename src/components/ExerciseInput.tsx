@@ -5,9 +5,10 @@ import { ExerciseEntry } from '../types/ExerciseEntry';
 
 interface ExerciseInputProps {
   onAddExerciseEntry: (entry: ExerciseEntry) => void;
+  userId: number; // Add userId prop
 }
 
-const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry }) => {
+const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry, userId }) => {
   const [exercise, setExercise] = useState('');
   const [duration, setDuration] = useState('');
   const [caloriesBurned, setCaloriesBurned] = useState('');
@@ -19,30 +20,16 @@ const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry }) => 
     const newEntry: ExerciseEntry = {
       id: Date.now(), // or any other unique identifier
       exercise,
-      duration: parseFloat(duration),
-      caloriesBurned: parseFloat(caloriesBurned),
+      duration: parseInt(duration, 10),
+      caloriesBurned: parseInt(caloriesBurned, 10),
       date: dateKey,
+      userId, // Include userId in the new entry
     };
-
-    try {
-      const response = await fetch('http://localhost:5000/api/progress/exercise', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newEntry),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add exercise entry');
-      }
-
-      const data = await response.json();
-      console.log('Exercise entry added successfully:', data);
-      onAddExerciseEntry(data);
-    } catch (error) {
-      console.error('Error adding exercise entry:', error);
-    }
+    onAddExerciseEntry(newEntry);
+    setExercise('');
+    setDuration('');
+    setCaloriesBurned('');
+    setEntryDate(new Date());
   };
 
   return (
@@ -51,23 +38,26 @@ const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry }) => 
         type="text"
         value={exercise}
         onChange={(e) => setExercise(e.target.value)}
-        placeholder="Enter exercise"
+        placeholder="Exercise"
+        required
       />
       <input
         type="number"
         value={duration}
         onChange={(e) => setDuration(e.target.value)}
-        placeholder="Enter duration (minutes)"
+        placeholder="Duration (minutes)"
+        required
       />
       <input
         type="number"
         value={caloriesBurned}
         onChange={(e) => setCaloriesBurned(e.target.value)}
-        placeholder="Enter calories burned"
+        placeholder="Calories Burned"
+        required
       />
       <DatePicker
         selected={entryDate}
-        onChange={(date: Date | null) => setEntryDate(date)}
+        onChange={(date: Date | null) => date && setEntryDate(date)}
       />
       <button type="submit">Add Exercise Entry</button>
     </form>

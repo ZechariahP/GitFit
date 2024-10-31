@@ -7,5 +7,6 @@ export interface FoodEntry {
     sodium: number;
     carbs: number;
     date: string;
-    }
+    userId: number; // Include userId field
+  }
       

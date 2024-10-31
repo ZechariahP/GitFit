@@ -23,6 +23,7 @@ interface ProgressTrackerProps {
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, exerciseEntries, onRemoveFoodEntry, onRemoveExerciseEntry }) => {
   const bmr = useSelector((state: RootState) => state.bmr.bmr);
+  const userId = useSelector((state: RootState) => state.auth.user?.id);
 
   const [currentDayEntries, setCurrentDayEntries] = useState<{ foodEntries: FoodEntry[], exerciseEntries: ExerciseEntry[] }>({ foodEntries: [], exerciseEntries: [] });
   const [error, setError] = useState<string | null>(null);
@@ -30,20 +31,27 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
   const [filter, setFilter] = useState<'week' | 'month' | 'date'>('week');
-  const [pastEntries, setPastEntries] = useState<{ date: Date, foodEntries: FoodEntry[], exerciseEntries: ExerciseEntry[] }[]>([]);
-  
+  const [pastEntries, setPastEntries] = useState<{ date: string, foodEntries: FoodEntry[], exerciseEntries: ExerciseEntry[] }[]>([]);
+
   useEffect(() => {
     const fetchProgressData = async () => {
+      const formattedDate = new Date(date).toISOString().split('T')[0];
       try {
-        const foodResponse = await fetch(`http://localhost:5000/api/progress/food/${date}`);
-        const exerciseResponse = await fetch(`http://localhost:5000/api/progress/exercise/${date}`);
-
+        const foodResponse = await fetch(`http://localhost:5000/api/progress/food/${formattedDate}?user_id=${userId}`);
+        const exerciseResponse = await fetch(`http://localhost:5000/api/progress/exercise/${formattedDate}?user_id=${userId}`);
+        
+        console.log('Food Response:', foodResponse);
+        console.log('Exercise Response:', exerciseResponse);
+        
         if (!foodResponse.ok || !exerciseResponse.ok) {
           throw new Error('Failed to fetch progress data');
         }
 
         const foodData = await foodResponse.json();
         const exerciseData = await exerciseResponse.json();
+
+        console.log('Food Data:', foodData);
+        console.log('Exercise Data:', exerciseData);
 
         const mappedExerciseEntries = mapExerciseEntries(exerciseData);
 
@@ -53,15 +61,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
         });
       } catch (error) {
         if (error instanceof Error) {
-          if (error instanceof Error) {
-            setError(error.message);
-          } else {
-            setError('An unknown error occurred');
-          }
-        } else {
-          setError('An unknown error occurred');
-        }
-        if (error instanceof Error) {
           setError(error.message);
         } else {
           setError('An unknown error occurred');
@@ -69,8 +68,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
       }
     };
 
+
     fetchProgressData();
-  }, [date, foodEntries, exerciseEntries]);
+  }, [date, foodEntries, exerciseEntries, userId]);
 
   useEffect(() => {
     fetchPastEntries();
@@ -97,19 +97,20 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
       dates = [selectedDate].filter(filterDate);
     }
 
-    const entries = await fetchEntriesForDateRange(dates);
+    const entries = await fetchEntriesForDateRange(dates, userId);
     setPastEntries(entries);
   };
 
-  const fetchEntriesForDateRange = async (dates: Date[]) => {
+  const fetchEntriesForDateRange = async (dates: Date[], user_id: number) => {
     return await Promise.all(dates.map(async (date) => {
+      const formattedDate = formatDate(date);
       try {
-        const foodResponse = await fetch(`http://localhost:5000/api/progress/food/${date}`);
-        const exerciseResponse = await fetch(`http://localhost:5000/api/progress/exercise/${date}`);
+        const foodResponse = await fetch(`http://localhost:5000/api/progress/food/${formattedDate}?user_id=${user_id}`);
+        const exerciseResponse = await fetch(`http://localhost:5000/api/progress/exercise/${formattedDate}?user_id=${user_id}`);
 
         if (!foodResponse.ok || !exerciseResponse.ok) {
           if (foodResponse.status === 404 || exerciseResponse.status === 404) {
-            return { date, foodEntries: [], exerciseEntries: [] };
+            return { date: formattedDate, foodEntries: [], exerciseEntries: [] };
           }
           throw new Error(`HTTP error! status: ${foodResponse.status} or ${exerciseResponse.status}`);
         }
@@ -117,10 +118,10 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
         const foodData = await foodResponse.json();
         const exerciseData = await exerciseResponse.json();
 
-        return { date, foodEntries: foodData, exerciseEntries: exerciseData };
+        return { date: formattedDate, foodEntries: foodData, exerciseEntries: exerciseData };
       } catch (error) {
         console.error('Error fetching data:', error);
-        return { date, foodEntries: [], exerciseEntries: [] };
+        return { date: formattedDate, foodEntries: [], exerciseEntries: []};
       }
     }));
   };
@@ -157,9 +158,36 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
     }
   };
 
-  const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
-    setFilter('date');
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = async (date: Date | null) => {
+    if (date) {
+      setSelectedDate(date);
+      const formattedDate = formatDate(date);
+      try {
+        const foodResponse = await fetch(`http://localhost:5000/api/progress/food/${formattedDate}`);
+        const exerciseResponse = await fetch(`http://localhost:5000/api/progress/exercise/${formattedDate}`);
+
+        if (!foodResponse.ok || !exerciseResponse.ok) {
+          throw new Error('Failed to fetch progress data');
+        }
+
+        const foodData = await foodResponse.json();
+        const exerciseData = await exerciseResponse.json();
+
+        const mappedExerciseEntries = mapExerciseEntries(exerciseData);
+
+        setPastEntries([{ date: formattedDate, foodEntries: foodData, exerciseEntries: mappedExerciseEntries }]);
+      } catch (error) {
+        console.error('Error fetching progress data:', error);
+        setError('Failed to fetch progress data');
+      }
+    }
   };
 
   const handleMonthChange = (date: Date | null) => {
@@ -214,15 +242,12 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
     return exerciseEntries.reduce(
       (totals, entry) => {
         totals.duration += entry.duration || 0;
-        totals.caloriesBurned += entry.caloriesBurned || 0;
+        totals.caloriesBurned += entry.calories_burned || 0;
         return totals;
       },
       { duration: 0, caloriesBurned: 0 }
     );
   };
-
-console.log('exerciseEntries:', exerciseEntries);
-
 
   const calculateNetGainLoss = (foodCalories: number, exerciseCaloriesBurned: number, bmr: number) => {
     return foodCalories - exerciseCaloriesBurned - bmr;
@@ -244,7 +269,7 @@ console.log('exerciseEntries:', exerciseEntries);
       <div style={{ flex: 1 }}>
         <h2>Progress Tracker</h2>
         <div>
-          <h3>Current Day: {date}</h3>
+          <h3>Current Day: {new Date().toLocaleDateString('en-US', { timeZone: 'GMT' })}</h3>
           <h4>Net Gain/Loss</h4>
           <p>Net Calories: {currentNetCalories}</p>
           <h4>Food Entries</h4>
@@ -262,7 +287,7 @@ console.log('exerciseEntries:', exerciseEntries);
             </thead>
             <tbody>
               {currentFoodEntries.map((entry) => (
-                <tr key={entry.id?.toString() || `food-${entry.food}-${entry.calories}`}>
+                <tr key={entry.id?.toString() || `food-${entry.food}-${entry.calories}-${entry.userId}`}>
                   <td>{entry.food}</td>
                   <td>{entry.calories}</td>
                   <td>{entry.fat}</td>
@@ -298,7 +323,7 @@ console.log('exerciseEntries:', exerciseEntries);
                 <tr key={entry.id?.toString() || `exercise-${entry.exercise}-${entry.duration}`}>
                   <td>{entry.exercise}</td>
                   <td>{entry.duration}</td>
-                  <td>{entry.caloriesBurned}</td>
+                  <td>{entry.calories_burned}</td>
                   <td>
                     <button onClick={() => handleRemoveExerciseEntry(entry.id || 0)}>Remove</button>
                   </td>
@@ -356,7 +381,7 @@ console.log('exerciseEntries:', exerciseEntries);
           const entryExerciseTotals = calculateExerciseTotals(entry.exerciseEntries);
           return (
             <div key={index}>
-              <h4>{entry.date.toDateString()}</h4>
+              <h4>{new Date(entry.date).toLocaleDateString('en-US', { timeZone: 'GMT' })}</h4>
               <h5>Food Entries</h5>
               <table style={{ border: '1px solid black', width: '100%', marginBottom: '20px' }}>
                 <thead>
@@ -371,16 +396,16 @@ console.log('exerciseEntries:', exerciseEntries);
                   </tr>
                 </thead>
                 <tbody>
-                  {entry.foodEntries.map((foodEntry) => (
-                    <tr key={foodEntry.id?.toString() || `food-${foodEntry.food}-${foodEntry.calories}`}>
-                      <td>{foodEntry.food}</td>
-                      <td>{foodEntry.calories}</td>
-                      <td>{foodEntry.fat}</td>
-                      <td>{foodEntry.protein}</td>
-                      <td>{foodEntry.sodium}</td>
-                      <td>{foodEntry.carbs}</td>
+                  {entry.foodEntries.map((entry) => (
+                    <tr key={entry.id?.toString() || `food-${entry.food}-${entry.calories}`}>
+                      <td>{entry.food}</td>
+                      <td>{entry.calories}</td>
+                      <td>{entry.fat}</td>
+                      <td>{entry.protein}</td>
+                      <td>{entry.sodium}</td>
+                      <td>{entry.carbs}</td>
                       <td>
-                        <button onClick={() => handleRemoveFoodEntry(foodEntry.id || 0)}>Remove</button>
+                        <button onClick={() => handleRemoveFoodEntry(entry.id || 0)}>Remove</button>
                       </td>
                     </tr>
                   ))}
@@ -408,7 +433,7 @@ console.log('exerciseEntries:', exerciseEntries);
                     <tr key={exerciseEntry.id?.toString() || `exercise-${exerciseEntry.exercise}-${exerciseEntry.duration}`}>
                       <td>{exerciseEntry.exercise}</td>
                       <td>{exerciseEntry.duration}</td>
-                      <td>{exerciseEntry.caloriesBurned}</td>
+                      <td>{exerciseEntry.calories_burned}</td>
                       <td>
                         <button onClick={() => handleRemoveExerciseEntry(exerciseEntry.id || 0)}>Remove</button>
                       </td>
