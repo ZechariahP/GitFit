@@ -1,11 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface AuthState {
+export interface AuthState {
   isAuthenticated: boolean;
   email: string | null;
   user: {
     id: number;
-    // Add other user properties if needed
   } | null;
 }
 

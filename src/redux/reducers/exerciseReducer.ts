@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ExerciseEntry } from '../../types/ExerciseEntry';
 
-interface ExerciseState {
+export interface ExerciseState {
   entries: ExerciseEntry[];
 }
 

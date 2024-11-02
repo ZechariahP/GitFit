@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface BMRDisplayProps {
+export interface BMRDisplayProps {
   bmr: number | null;
 }
 

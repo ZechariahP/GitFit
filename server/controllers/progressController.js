@@ -1,13 +1,13 @@
 const { neon } = require('@neondatabase/serverless');
 const sql = neon(process.env.DATABASE_URL);
 
-// Get food progress data by date
+// Get food progress data by date and user_id
 const getFoodProgressByDate = async (req, res) => {
   const { date } = req.params;
-  const { user_id } = req.query;
+
 
   try {
-    const result = await sql`SELECT * FROM food_progress WHERE date = ${date} AND user_id = ${user_id}`;
+    const result = await sql`SELECT * FROM food_progress WHERE date = ${date}`;
     res.json(result);
   } catch (error) {
     console.error('Error fetching food progress data:', error);
@@ -15,13 +15,12 @@ const getFoodProgressByDate = async (req, res) => {
   }
 };
 
-// Get exercise progress data by date
+// Get exercise progress data by date and user_id
 const getExerciseProgressByDate = async (req, res) => {
   const { date } = req.params;
-  const { user_id } = req.query;
 
   try {
-    const result = await sql`SELECT * FROM exercise_progress WHERE date = ${date} AND user_id = ${user_id}`;
+    const result = await sql`SELECT * FROM exercise_progress WHERE date = ${date}`;
     res.json(result);
   } catch (error) {
     console.error('Error fetching exercise progress data:', error);
@@ -31,18 +30,12 @@ const getExerciseProgressByDate = async (req, res) => {
 
 // Add food progress entry
 const addFoodProgressEntry = async (req, res) => {
-  const { date, food, calories, fat, protein, sodium, carbs } = req.body;
-
-  // Validate the request payload
-  if (!date || !food) {
-    console.error('Invalid request payload:', req.body); // Debugging log
-    return res.status(400).json({ message: 'Invalid request payload' });
-  }
+  const { date, food, calories, fat, protein, sodium, carbs, user_id } = req.body;
 
   try {
     const result = await sql`
-      INSERT INTO food_progress (date, food, calories, fat, protein, sodium, carbs)
-      VALUES (${date}, ${food}, ${calories}, ${fat}, ${protein}, ${sodium}, ${carbs})
+      INSERT INTO food_progress (date, food, calories, fat, protein, sodium, carbs, user_id)
+      VALUES (${date}, ${food}, ${calories}, ${fat}, ${protein}, ${sodium}, ${carbs}, ${user_id})
       RETURNING *`;
     res.json(result[0]);
   } catch (error) {
@@ -53,12 +46,12 @@ const addFoodProgressEntry = async (req, res) => {
 
 // Add exercise progress entry
 const addExerciseProgressEntry = async (req, res) => {
-  const { date, exercise, duration, caloriesBurned } = req.body;
+  const { date, exercise, duration, caloriesBurned, user_id } = req.body;
 
   try {
     const result = await sql`
-      INSERT INTO exercise_progress (date, exercise, duration, caloriesBurned)
-      VALUES (${date}, ${exercise}, ${duration}, ${caloriesBurned})
+      INSERT INTO exercise_progress (date, exercise, duration, calories_burned, user_id)
+      VALUES (${date}, ${exercise}, ${duration}, ${caloriesBurned}, ${user_id})
       RETURNING *`;
     res.json(result[0]);
   } catch (error) {

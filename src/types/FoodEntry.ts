@@ -6,7 +6,7 @@ export interface FoodEntry {
     protein: number;
     sodium: number;
     carbs: number;
-    date: string;
-    userId: number; // Include userId field
+    user_id: number; // Include userId field
   }
-      
+
+  export default FoodEntry;

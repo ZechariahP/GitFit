@@ -2,7 +2,8 @@ export interface ExerciseEntry {
     id: number;
     exercise: string;
     duration: number;
-    caloriesBurned: number;
-    date: string;
-    userId: number; // Include userId field
+    calories_burned: number;
+    user_id: number; // Include userId field
   }
+
+export default ExerciseEntry;

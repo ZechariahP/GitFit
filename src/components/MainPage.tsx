@@ -41,13 +41,23 @@ const MainPage: React.FC = () => {
           setLoadingBmr(false);
         });
 
-      fetch(`http://localhost:5000/api/progress/food/${date}?userId=${user.id}`)
-        .then(response => response.json())
+      fetch(`http://localhost:5000/api/progress/food/${date}?user_id=${user.id}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
         .then(data => setFoodEntries(data))
         .catch(error => console.error('Error fetching food entries:', error));
 
-      fetch(`http://localhost:5000/api/progress/exercise/${date}?userId=${user.id}`)
-        .then(response => response.json())
+      fetch(`http://localhost:5000/api/progress/exercise/${date}?user_id=${user.id}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
         .then(data => setExerciseEntries(data))
         .catch(error => console.error('Error fetching exercise entries:', error));
     }
@@ -141,7 +151,7 @@ const MainPage: React.FC = () => {
   const handleRemoveFoodEntry = async (id: number) => {
     if (user) {
       try {
-        const response = await fetch(`http://localhost:5000/api/progress/food/${date}/${id}?userId=${user.id}`, {
+        const response = await fetch(`http://localhost:5000/api/progress/food/${date}/${id}?user_id=${user.id}`, {
           method: 'DELETE',
         });
 
@@ -159,7 +169,7 @@ const MainPage: React.FC = () => {
   const handleRemoveExerciseEntry = async (id: number) => {
     if (user) {
       try {
-        const response = await fetch(`http://localhost:5000/api/progress/exercise/${date}/${id}?userId=${user.id}`, {
+        const response = await fetch(`http://localhost:5000/api/progress/exercise/${date}/${id}?user_id=${user.id}`, {
           method: 'DELETE',
         });
 
@@ -192,15 +202,19 @@ const MainPage: React.FC = () => {
         <button onClick={handleWeightUpdate}>Update Weight</button>
       </div>
       {loadingBmr ? <p>Loading BMR...</p> : bmr !== null && <BMRDisplay bmr={bmr} />}
-      {user && <FoodInput onAddFoodEntry={handleAddFoodEntry} userId={user.id} />}
-      {user && <ExerciseInput onAddExerciseEntry={handleAddExerciseEntry} userId={user.id} />}
-      <ProgressTracker 
-        date={date} 
-        foodEntries={foodEntries} 
-        exerciseEntries={exerciseEntries} 
-        onRemoveFoodEntry={handleRemoveFoodEntry} 
-        onRemoveExerciseEntry={handleRemoveExerciseEntry} 
-      />
+      {user && <FoodInput onAddFoodEntry={handleAddFoodEntry} user_id={user.id} />}
+      {user && <ExerciseInput onAddExerciseEntry={handleAddExerciseEntry} user_id={user.id} />}
+      {user && (
+        <ProgressTracker 
+          date={date} 
+          foodEntries={foodEntries} 
+          exerciseEntries={exerciseEntries} 
+          onRemoveFoodEntry={handleRemoveFoodEntry} 
+          onRemoveExerciseEntry={handleRemoveExerciseEntry}
+          user_id={user.id}
+          bmr={bmr}
+        />
+      )}
     </div>
   );
 };

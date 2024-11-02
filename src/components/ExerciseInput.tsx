@@ -5,7 +5,7 @@ import { ExerciseEntry } from '../types/ExerciseEntry';
 
 interface ExerciseInputProps {
   onAddExerciseEntry: (entry: ExerciseEntry) => void;
-  userId: number; // Add userId prop
+  user_id: number; // Add userId prop
 }
 
 const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry, userId }) => {
@@ -23,7 +23,7 @@ const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry, userI
       duration: parseInt(duration, 10),
       caloriesBurned: parseInt(caloriesBurned, 10),
       date: dateKey,
-      userId, // Include userId in the new entry
+      user_id, // Include userId in the new entry
     };
     onAddExerciseEntry(newEntry);
     setExercise('');

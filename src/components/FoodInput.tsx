@@ -5,10 +5,10 @@ import { FoodEntry } from '../types/FoodEntry';
 
 interface FoodInputProps {
   onAddFoodEntry: (entry: FoodEntry) => void;
-  userId: number; // Add userId prop
+  user_id: number; // Add userId prop
 }
 
-const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry, userId }) => {
+const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry, user_id }) => {
   const [food, setFood] = useState('');
   const [calories, setCalories] = useState('');
   const [fat, setFat] = useState('');
@@ -29,7 +29,7 @@ const FoodInput: React.FC<FoodInputProps> = ({ onAddFoodEntry, userId }) => {
       sodium: parseInt(sodium, 10),
       carbs: parseInt(carbs, 10),
       date: dateKey,
-      userId, // Include userId in the new entry
+      user_id, // Include userId in the new entry
     };
     onAddFoodEntry(newEntry);
     setFood('');

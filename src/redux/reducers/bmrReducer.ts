@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface BMRState {
+export interface BMRState {
   weight: number;
   height: number;
   age: number;
