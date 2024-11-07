@@ -4,11 +4,12 @@ const sql = neon(process.env.DATABASE_URL);
 // Get food progress data by date and user_id
 const getFoodProgressByDate = async (req, res) => {
   const { date } = req.params;
+  const { user_id } = parseInt(req.query);
 
 
   try {
-    const result = await sql`SELECT * FROM food_progress WHERE date = ${date}`;
-    res.json(result);
+    const result = await sql`SELECT * FROM food_progress WHERE date = ${date} AND user_id = ${user_id}`;
+    return res.json(result);
   } catch (error) {
     console.error('Error fetching food progress data:', error);
     res.status(500).json({ message: 'Server error' });
@@ -18,9 +19,10 @@ const getFoodProgressByDate = async (req, res) => {
 // Get exercise progress data by date and user_id
 const getExerciseProgressByDate = async (req, res) => {
   const { date } = req.params;
+  const { user_id } = parseInt(req.query);
 
   try {
-    const result = await sql`SELECT * FROM exercise_progress WHERE date = ${date}`;
+    const result = await sql`SELECT * FROM exercise_progress WHERE date = ${date} AND user_id = ${user_id}`;
     res.json(result);
   } catch (error) {
     console.error('Error fetching exercise progress data:', error);

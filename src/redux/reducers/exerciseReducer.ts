@@ -17,7 +17,7 @@ const exerciseSlice = createSlice({
       state.entries = action.payload;
     },
     addExerciseEntry: (state, action: PayloadAction<ExerciseEntry>) => {
-      state.entries = [...state.entries, action.payload];
+      state.entries.push(action.payload)
     },
     removeExerciseEntry: (state, action: PayloadAction<number>) => {
       state.entries.splice(action.payload, 1);

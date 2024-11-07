@@ -8,7 +8,7 @@ interface ExerciseInputProps {
   user_id: number; // Add userId prop
 }
 
-const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry, userId }) => {
+const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry, user_id }) => {
   const [exercise, setExercise] = useState('');
   const [duration, setDuration] = useState('');
   const [caloriesBurned, setCaloriesBurned] = useState('');
@@ -21,9 +21,9 @@ const ExerciseInput: React.FC<ExerciseInputProps> = ({ onAddExerciseEntry, userI
       id: Date.now(), // or any other unique identifier
       exercise,
       duration: parseInt(duration, 10),
-      caloriesBurned: parseInt(caloriesBurned, 10),
+      calories_burned: parseInt(caloriesBurned, 10),
       date: dateKey,
-      user_id, // Include userId in the new entry
+      user_id, // Assign the user_id to the new entry
     };
     onAddExerciseEntry(newEntry);
     setExercise('');

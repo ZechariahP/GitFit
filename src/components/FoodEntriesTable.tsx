@@ -5,9 +5,15 @@ interface FoodEntriesTableProps {
   foodEntries: FoodEntry[];
   onRemoveFoodEntry: (id: number) => void;
   calculateFoodTotals: (entries: FoodEntry[]) => { calories: number, fat: number, protein: number, sodium: number, carbs: number };
+  user_id: number | undefined;
 }
 
 const FoodEntriesTable: React.FC<FoodEntriesTableProps> = ({ foodEntries, onRemoveFoodEntry, calculateFoodTotals }) => {
+
+  const handleRemove = (id: number) => {
+    onRemoveFoodEntry(id);
+  };
+
   return (
     <div>
       <h4>Food Entries</h4>
@@ -33,7 +39,7 @@ const FoodEntriesTable: React.FC<FoodEntriesTableProps> = ({ foodEntries, onRemo
               <td>{entry.sodium}</td>
               <td>{entry.carbs}</td>
               <td>
-                <button onClick={(e) => { e.preventDefault(); onRemoveFoodEntry(entry.id); }}>Remove</button>
+                <button onClick={() => handleRemove(entry.id || 0)}>Remove</button>
               </td>
             </tr>
           ))}

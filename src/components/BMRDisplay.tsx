@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface BMRDisplayProps {
-  bmr: number | null;
+  bmr: number;
 }
 
 const BMRDisplay: React.FC<BMRDisplayProps> = ({ bmr }) => {

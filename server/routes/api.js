@@ -4,7 +4,6 @@ const { neon } = require('@neondatabase/serverless');
 const sql = neon(process.env.DATABASE_URL);
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const progressController = require('../controllers/progressController');
 
 // Define routes for general API
 router.get('/', (req, res) => {
@@ -100,7 +99,32 @@ router.post('/register', async (req, res) => {
 });
 
 // Define routes for food progress data
-router.get('/progress/food/:date', progressController.getFoodProgressByDate);
+router.get('/progress/food', async (req, res) => {
+  const { date, user_id } = req.query;
+  try {
+    let result;
+    if (date && user_id) {
+      const formattedDate = new Date(date).toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+      result = await sql`SELECT * FROM food_progress WHERE date = ${formattedDate} AND user_id = ${user_id}`;
+    } else if (date) {
+      const formattedDate = new Date(date).toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+      result = await sql`SELECT * FROM food_progress WHERE date = ${formattedDate}`;
+    } else if (user_id) {
+      result = await sql`SELECT * FROM food_progress WHERE user_id = ${user_id}`;
+    } else {
+      result = await sql`SELECT * FROM food_progress`;
+    }
+    // Format dates to 'YYYY-MM-DD'
+    result = result.map(entry => ({
+      ...entry,
+      date: new Date(entry.date).toISOString().split('T')[0]
+    }));
+    return res.json(result);
+  } catch (error) {
+    console.error('Error fetching food progress data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 router.post('/progress/food', async (req, res) => {
   const { date, food, calories, fat, protein, sodium, carbs, userId } = req.body;
@@ -117,12 +141,10 @@ router.post('/progress/food', async (req, res) => {
   }
 });
 
-router.delete('/progress/food/:date/:id', async (req, res) => {
-  const { date, id } = req.params;
-  const { userId } = req.query;
-  const formattedDate = new Date(date).toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+router.delete('/progress/food', async (req, res) => {
+  const { id } = req.query;
   try {
-    await sql`DELETE FROM food_progress WHERE date = ${formattedDate} AND id = ${id} AND user_id = ${userId}`;
+    await sql`DELETE FROM food_progress WHERE id = ${id}`;
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting food entry:', error);
@@ -131,15 +153,40 @@ router.delete('/progress/food/:date/:id', async (req, res) => {
 });
 
 // Define routes for exercise progress data
-router.get('/progress/exercise/:date', progressController.getExerciseProgressByDate);
+router.get('/progress/exercise', async (req, res) => {
+  const { date, user_id } = req.query;
+  try {
+    let result;
+    if (date && user_id) {
+      const formattedDate = new Date(date).toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+      result = await sql`SELECT * FROM exercise_progress WHERE date = ${formattedDate} AND user_id = ${user_id}`;
+    } else if (date) {
+      const formattedDate = new Date(date).toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+      result = await sql`SELECT * FROM exercise_progress WHERE date = ${formattedDate}`;
+    } else if (user_id) {
+      result = await sql`SELECT * FROM exercise_progress WHERE user_id = ${user_id}`;
+    } else {
+      result = await sql`SELECT * FROM exercise_progress`;
+    }
+    // Format dates to 'YYYY-MM-DD'
+    result = result.map(entry => ({
+      ...entry,
+      date: new Date(entry.date).toISOString().split('T')[0]
+    }));
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching exercise progress data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 router.post('/progress/exercise', async (req, res) => {
-  const { date, exercise, duration, caloriesBurned, userId } = req.body;
+  const { date, exercise, duration, calories_burned, userId } = req.body;
   const formattedDate = new Date(date).toISOString().split('T')[0]; // Format date as YYYY-MM-DD
   try {
     const result = await sql`
       INSERT INTO exercise_progress (date, exercise, duration, calories_burned, user_id) 
-      VALUES (${formattedDate}, ${exercise}, ${duration}, ${caloriesBurned}, ${userId}) 
+      VALUES (${formattedDate}, ${exercise}, ${duration}, ${calories_burned}, ${userId}) 
       RETURNING *`;
     res.json(result[0]);
   } catch (error) {
@@ -148,12 +195,10 @@ router.post('/progress/exercise', async (req, res) => {
   }
 });
 
-router.delete('/progress/exercise/:date/:id', async (req, res) => {
-  const { date, id } = req.params;
-  const { userId } = req.query;
-  const formattedDate = new Date(date).toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+router.delete('/progress/exercise', async (req, res) => {
+  const { id } = req.query;
   try {
-    await sql`DELETE FROM exercise_progress WHERE date = ${formattedDate} AND id = ${id} AND user_id = ${userId}`;
+    await sql`DELETE FROM exercise_progress WHERE id = ${id}`;
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting exercise entry:', error);

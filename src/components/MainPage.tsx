@@ -8,7 +8,7 @@ import BMRDisplay from './BMRDisplay';
 const MainPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [user, setUser] = useState<{ id: number, firstName: string, email: string, weight?: number } | null>(null);
-  const [date] = useState(new Date().toISOString().split('T')[0]);
+  const [date] = useState(new Date().toLocaleDateString('en-CA'));
   const [foodEntries, setFoodEntries] = useState<any[]>([]);
   const [exerciseEntries, setExerciseEntries] = useState<any[]>([]);
   const [bmr, setBmr] = useState<number | null>(null);
@@ -33,6 +33,7 @@ const MainPage: React.FC = () => {
       fetch(`http://localhost:5000/api/bmr?email=${user.email}`)
         .then(response => response.json())
         .then(data => {
+          console.log('BMR data:', data);
           setBmr(data.bmr);
           setLoadingBmr(false);
         })
@@ -41,24 +42,38 @@ const MainPage: React.FC = () => {
           setLoadingBmr(false);
         });
 
-      fetch(`http://localhost:5000/api/progress/food/${date}?user_id=${user.id}`)
+      fetch(`http://localhost:5000/api/progress/food?date=${date}&user_id=${user.id}`)
         .then(response => {
           if (!response.ok) {
+            if (response.status === 404) {
+              console.warn('No food entries found for the specified date and user.');
+              return [];
+            }
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           return response.json();
         })
-        .then(data => setFoodEntries(data))
+        .then(data => {
+          console.log('Food entries:', data);
+          setFoodEntries(data);
+        })
         .catch(error => console.error('Error fetching food entries:', error));
 
-      fetch(`http://localhost:5000/api/progress/exercise/${date}?user_id=${user.id}`)
+      fetch(`http://localhost:5000/api/progress/exercise?date=${date}&user_id=${user.id}`)
         .then(response => {
           if (!response.ok) {
+            if (response.status === 404) {
+              console.warn('No exercise entries found for the specified date and user.');
+              return [];
+            }
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           return response.json();
         })
-        .then(data => setExerciseEntries(data))
+        .then(data => {
+          console.log('Exercise entries:', data);
+          setExerciseEntries(data);
+        })
         .catch(error => console.error('Error fetching exercise entries:', error));
     }
   }, [user, date]);
@@ -149,9 +164,9 @@ const MainPage: React.FC = () => {
   };
 
   const handleRemoveFoodEntry = async (id: number) => {
-    if (user) {
+    if (id) {
       try {
-        const response = await fetch(`http://localhost:5000/api/progress/food/${date}/${id}?user_id=${user.id}`, {
+        const response = await fetch(`http://localhost:5000/api/progress/food?id=${id}`, {
           method: 'DELETE',
         });
 
@@ -167,9 +182,9 @@ const MainPage: React.FC = () => {
   };
 
   const handleRemoveExerciseEntry = async (id: number) => {
-    if (user) {
+    if (exerciseEntries) {
       try {
-        const response = await fetch(`http://localhost:5000/api/progress/exercise/${date}/${id}?user_id=${user.id}`, {
+        const response = await fetch(`http://localhost:5000/api/progress/exercise?id=${id}`, {
           method: 'DELETE',
         });
 
@@ -208,7 +223,7 @@ const MainPage: React.FC = () => {
         <ProgressTracker 
           date={date} 
           foodEntries={foodEntries} 
-          exerciseEntries={exerciseEntries} 
+          exerciseEntries={exerciseEntries}
           onRemoveFoodEntry={handleRemoveFoodEntry} 
           onRemoveExerciseEntry={handleRemoveExerciseEntry}
           user_id={user.id}
