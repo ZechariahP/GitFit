@@ -1,0 +1,20 @@
+Table Styles
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white; /* White background */
+    margin: 20px 0;
+  }
+  
+  table, th, td {
+    border: 1px solid black; /* Black borders */
+  }
+  
+  th, td {
+    padding: 10px;
+    text-align: left;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f9f9f9; /* Alternating row colors for better readability */
+  }
