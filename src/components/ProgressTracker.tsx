@@ -18,7 +18,7 @@ interface ProgressTrackerProps {
   onRemoveExerciseEntry: (id: number) => void;
   user_id: number;
   email: string;
-  bmr: number | null;
+  bmr: number;
 }
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, exerciseEntries, onRemoveFoodEntry, onRemoveExerciseEntry }) => {
@@ -309,7 +309,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
         <div>
           <h3>Current Day: {new Date().toLocaleDateString('en-US', { timeZone: 'GMT' })}</h3>
           <h4>Net Gain/Loss</h4>
-          <p>Net Calories: {calculateNetGainLoss - (bmr || 0)}</p>
+          <p>Net Calories: {calculateNetGainLoss - bmr}</p>
               <FoodEntriesTable
                 foodEntries={currentFoodEntries}
                 onRemoveFoodEntry={handleRemoveFoodEntry}
