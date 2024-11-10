@@ -299,7 +299,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
   // Calculate net calories for the current date
   const currentFoodTotals = calculateFoodTotals(currentFoodEntries);
   const currentExerciseTotals = calculateExerciseTotals(currentExerciseEntries);
-  const calculateNetGainLoss = (currentFoodTotals.calories || 0) - (currentExerciseTotals.caloriesBurned || 0);
+  const calculateNetGainLoss = currentFoodTotals.calories - currentExerciseTotals.caloriesBurned;
 
   
   return (

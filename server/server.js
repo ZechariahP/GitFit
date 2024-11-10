@@ -49,6 +49,34 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+app.post('/api/register', async (req, res) => {
+  const { firstName, email, password, dob, height, weight, gender } = req.body;
+  try {
+    // Calculate BMR (Basal Metabolic Rate) based on user details
+    let bmr;
+    if (gender === 'male') {
+      bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * (new Date().getFullYear() - new Date(dob).getFullYear()));
+    } else {
+      bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * (new Date().getFullYear() - new Date(dob).getFullYear()));
+    }
+
+    // Insert the new user into the database
+    const result = await sql`
+      INSERT INTO users (firstname, email, password, dob, height, weight, gender, bmr)
+      VALUES (${firstName}, ${email}, ${password}, ${dob}, ${height}, ${weight}, ${gender}, ${bmr})
+      RETURNING id, firstname, email, bmr
+    `;
+
+    console.log('SQL Insert Result:', result); // Debugging statement
+
+    const user = result[0];
+    res.json(user);
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 app.get('/version', async (req, res) => {
   try {
     const result = await sql`SELECT version()`;
