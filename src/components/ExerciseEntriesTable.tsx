@@ -5,9 +5,10 @@ interface ExerciseEntriesTableProps {
   exerciseEntries: ExerciseEntry[];
   onRemoveExerciseEntry: (id: number) => void;
   calculateExerciseTotals: (entries: ExerciseEntry[]) => { duration: number, caloriesBurned: number };
+  user_id: number | undefined;
 }
 
-const ExerciseEntriesTable: React.FC<ExerciseEntriesTableProps> = ({ exerciseEntries, onRemoveExerciseEntry, calculateExerciseTotals, user_id }) => {
+const ExerciseEntriesTable: React.FC<ExerciseEntriesTableProps> = ({ exerciseEntries, onRemoveExerciseEntry, calculateExerciseTotals}) => {
 
   const handleRemove = (id: number) => {
     onRemoveExerciseEntry(id);

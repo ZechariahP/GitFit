@@ -60,7 +60,8 @@ const Login: React.FC = () => {
           <h2>Register</h2>
           <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name" />
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" /><br></br>
+          <label>Date of Birth:</label>
           <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} placeholder="Date of Birth" />
           <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} placeholder="Height (cm)" />
           <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Weight (kg)" />
