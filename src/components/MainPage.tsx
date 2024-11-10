@@ -19,6 +19,7 @@ const MainPage: React.FC = () => {
   useEffect(() => {
     fetch('http://localhost:5000/api/')
       .then(response => response.text())
+      .then (data => console.log(data))
       .catch(error => console.error('Error fetching API message:', error));
 
     const userData = localStorage.getItem('user');
