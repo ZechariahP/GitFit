@@ -49,26 +49,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.post('/api/register', async (req, res) => {
-  const { firstName, email, password, dob, height, weight, gender } = req.body;
-  try {
-    // Insert the new user into the database
-    const result = await sql`
-      INSERT INTO users (firstname, email, password, dob, height, weight, gender)
-      VALUES (${firstName}, ${email}, ${password}, ${dob}, ${height}, ${weight}, ${gender})
-      RETURNING id, firstname, email
-    `;
-
-    console.log('SQL Insert Result:', result); // Debugging statement
-
-    const user = result[0];
-    res.json(user);
-  } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
 app.get('/version', async (req, res) => {
   try {
     const result = await sql`SELECT version()`;
