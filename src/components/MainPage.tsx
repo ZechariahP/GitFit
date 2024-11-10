@@ -4,9 +4,10 @@ import FoodInput from './FoodInput';
 import ExerciseInput from './ExerciseInput';
 import ProgressTracker from './ProgressTracker';
 import BMRDisplay from './BMRDisplay';
-import './MainPage.css'; // Import the CSS file
 
 const MainPage: React.FC = () => {
+  const [message, setMessage] = useState('');
+  const [user, setUser] = useState<{ id: number, firstName: string, email: string, weight?: number } | null>(null);
   const [user, setUser] = useState<{ id: number, firstname: string, email: string, weight?: number } | null>(null);
   const [date] = useState(new Date().toLocaleDateString('en-CA'));
   const [foodEntries, setFoodEntries] = useState<any[]>([]);
@@ -24,8 +25,7 @@ const MainPage: React.FC = () => {
 
     const userData = localStorage.getItem('user');
     if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
+      setUser(JSON.parse(userData));
     }
   }, []);
 
@@ -201,19 +201,12 @@ const MainPage: React.FC = () => {
   };
 
   return (
-    <div className="container">
-      <header>
-        <h1>Main Page</h1>
-      </header>
-      <div className="welcome-container">
-        {user && (
-          <p>
-            Welcome, {user.firstname}!
-            <button style={{ marginLeft: '20px' }} onClick={handleLogout}>Logout</button>
-          </p>
-        )}
-      </div>
-      <div className="update-weight-container">
+    <div>
+      <h1>Main Page</h1>
+      <p>{message}</p>
+      {user && <p>Welcome, {user.firstName}!</p>}
+      <button onClick={handleLogout}>Logout</button>
+      <div>
         <label>
           Update Weight (kg):
           <input
@@ -224,27 +217,20 @@ const MainPage: React.FC = () => {
         </label>
         <button onClick={handleWeightUpdate}>Update Weight</button>
       </div>
-      {loadingBmr ? <p>Loading BMR...</p> : bmr !== null && user !== null && <BMRDisplay bmr={bmr} />}
-      <div className="main-content">
-        <div className="input-container">
-          {user && <FoodInput onAddFoodEntry={handleAddFoodEntry} user_id={user.id} />}
-          {user && <ExerciseInput onAddExerciseEntry={handleAddExerciseEntry} user_id={user.id} />}
-        </div>
-        <div className="progress-tracker-container">
-          {user && (
-            <ProgressTracker 
-              date={date} 
-              foodEntries={foodEntries} 
-              exerciseEntries={exerciseEntries}
-              onRemoveFoodEntry={handleRemoveFoodEntry} 
-              onRemoveExerciseEntry={handleRemoveExerciseEntry}
-              user_id={user.id}
-              bmr={bmr}
-              email={user.email}
-            />
-          )}
-        </div>
-      </div>
+      {loadingBmr ? <p>Loading BMR...</p> : bmr !== null && <BMRDisplay bmr={bmr} />}
+      {user && <FoodInput onAddFoodEntry={handleAddFoodEntry} user_id={user.id} />}
+      {user && <ExerciseInput onAddExerciseEntry={handleAddExerciseEntry} user_id={user.id} />}
+      {user && (
+        <ProgressTracker 
+          date={date} 
+          foodEntries={foodEntries} 
+          exerciseEntries={exerciseEntries}
+          onRemoveFoodEntry={handleRemoveFoodEntry} 
+          onRemoveExerciseEntry={handleRemoveExerciseEntry}
+          user_id={user.id}
+          bmr={bmr}
+        />
+      )}
     </div>
   );
 };
