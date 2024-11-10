@@ -40,7 +40,7 @@ const Login: React.FC = () => {
         gender,
       });
       localStorage.setItem('user', JSON.stringify(response.data));
-      navigate('/');
+      navigate('/main');
     } catch (error) {
       console.error('Error registering:', error);
       setError('Error registering user');
