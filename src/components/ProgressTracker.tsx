@@ -18,7 +18,7 @@ interface ProgressTrackerProps {
   onRemoveExerciseEntry: (id: number) => void;
   user_id: number;
   email: string;
-  bmr: number;
+  bmr: number | null;
 }
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, exerciseEntries, onRemoveFoodEntry, onRemoveExerciseEntry }) => {
