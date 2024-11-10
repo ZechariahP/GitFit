@@ -5,7 +5,7 @@ const apiRouter = require('./routes/api');
 const { neon } = require('@neondatabase/serverless');
 
 const app = express();
-const port = process.env.PORT || 4000;
+const port = 5000;
 
 const corsOptions = {
   credentials: true,
