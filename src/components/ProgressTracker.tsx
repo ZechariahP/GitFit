@@ -7,7 +7,8 @@ import { ExerciseEntry } from '../types/ExerciseEntry';
 import { FoodEntry } from '../types/FoodEntry';
 import FoodEntriesTable from './FoodEntriesTable';
 import ExerciseEntriesTable from './ExerciseEntriesTable';
-import { mapExerciseEntries, formatDate, calculateFoodTotals, calculateExerciseTotals, calculateNetGainLoss } from '../utils/utils';
+import { mapExerciseEntries, formatDate, calculateFoodTotals, calculateExerciseTotals } from '../utils/utils';
+import './ProgressTracker.css';
 
 interface ProgressTrackerProps {
   date: string;
@@ -17,6 +18,7 @@ interface ProgressTrackerProps {
   onRemoveExerciseEntry: (id: number) => void;
   user_id: number;
   email: string;
+  bmr: number | null;
 }
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, exerciseEntries, onRemoveFoodEntry, onRemoveExerciseEntry }) => {
@@ -297,7 +299,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
   // Calculate net calories for the current date
   const currentFoodTotals = calculateFoodTotals(currentFoodEntries);
   const currentExerciseTotals = calculateExerciseTotals(currentExerciseEntries);
-  const calculateNetGainLoss = currentFoodTotals.calories - currentExerciseTotals.caloriesBurned - bmr;
+  const calculateNetGainLoss = currentFoodTotals.calories - currentExerciseTotals.caloriesBurned;
 
   
   return (
@@ -307,7 +309,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
         <div>
           <h3>Current Day: {new Date().toLocaleDateString('en-US', { timeZone: 'GMT' })}</h3>
           <h4>Net Gain/Loss</h4>
-          <p>Net Calories: {calculateNetGainLoss}</p>
+          <p>Net Calories: {calculateNetGainLoss - bmr}</p>
               <FoodEntriesTable
                 foodEntries={currentFoodEntries}
                 onRemoveFoodEntry={handleRemoveFoodEntry}

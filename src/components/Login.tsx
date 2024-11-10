@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './Login.css';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -47,7 +48,13 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="login-page">
+      <div className = "header">
+        <h1>GitFit</h1>
+        <p>Food and Exercise Tracker</p>       
+      </div>
+
+    <div className="login-container">
       {isRegistering ? (
         <div>
           <h2>Register</h2>
@@ -63,21 +70,24 @@ const Login: React.FC = () => {
             <option value="male">Male</option>
             <option value="female">Female</option>
           </select>
+          
           <button onClick={handleRegister}>Register</button>
           <button onClick={() => setIsRegistering(false)}>Back to Login</button>
         </div>
       ) : (
-        <div>
+        <div className="login-form">
           <h2>Login</h2>
           <form onSubmit={handleLogin}>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
             <button type="submit">Login</button>
           </form>
+          <p>Don't have an account?</p>
           <button onClick={() => setIsRegistering(true)}>Register</button>
         </div>
       )}
       {error && <p style={{ color: 'red' }}>{error}</p>}
+    </div>
     </div>
   );
 };
