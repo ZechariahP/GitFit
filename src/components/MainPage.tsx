@@ -115,7 +115,7 @@ const MainPage: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     setUser(null);
-    navigate('/login');
+    navigate('/');
   };
 
   const handleAddFoodEntry = async (newEntry: any) => {

@@ -23,6 +23,32 @@ app.use('/api', apiRouter);
 
 const sql = neon(process.env.DATABASE_URL);
 
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    // Query the database to find the user with the provided email and password
+    const result = await sql`
+      SELECT id, firstname, email
+      FROM users
+      WHERE email = ${email} AND password = ${password}
+    `;
+
+    console.log('SQL Query Result:', result); // Debugging statement
+
+    if (result.length > 0) {
+      // User found, return user data
+      const user = result[0];
+      res.json(user);
+    } else {
+      // User not found, return an error
+      res.status(401).json({ message: 'Invalid credentials' });
+    }
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 app.get('/version', async (req, res) => {
   try {
     const result = await sql`SELECT version()`;

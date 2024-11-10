@@ -21,7 +21,7 @@ const Login: React.FC = () => {
       const response = await axios.post('http://localhost:5000/api/login', { email, password });
       localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem('token', response.data.token);
-      navigate('/');
+      navigate('/main');
     } catch (error) {
       console.error('Error logging in:', error);
       setError('Invalid email or password');
