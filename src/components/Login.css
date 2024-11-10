@@ -6,74 +6,75 @@ body {
     background-color: #f4f4f4;
     color: #333;
     display: flex;
+    justify-content: center;
+    align-items: center;
     height: 100vh;
-}
+    overflow: hidden; /* Prevent scrolling */
+  }
   
-/* Page Container */
-.login-page {
+  /* Page Container */
+  .login-page {
     text-align: center;
     padding: 20px;
-}
+  }
   
-/* Container for the login form */
-.login-container {
+  /* Container for the login form */
+  .login-container {
     background-color: white;
-    padding: 40px;
+    padding: 20px; /* Adjusted padding */
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
     text-align: center;
-    position: absolute;
-    margin-top: 150px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: center;
-}
-  
-/* Header */
-.login-page .header {
-    position: relative;
-    top: -300px;
-    color: #005eff;
-    font-size: 100px;
-    white-space: nowrap;
-}
-
-.login-page .header h1 {
-    margin-bottom: 0; /* Adjust this value as needed */
-}
-
-.login-page .header p {
-    margin-top: 0;
-}
-  
-
-form {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
+    justify-content: center;
+  }
   
-label {
+  /* Header */
+  .login-page .header {
+    color: #005eff;
+    font-size: 2.5em; /* Adjusted font size */
+    margin-bottom: 20px;
+  }
+  
+  .login-page .header h1 {
+    margin-bottom: 0; /* Adjust this value as needed */
+  }
+  
+  .login-page .header p {
+    margin-top: 0;
+  }
+  
+  /* Form */
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  label {
     margin-bottom: 5px;
     align-self: flex-start;
-}
+  }
   
-input[type="text"],
-input[type="email"],
-input[type="password"] {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="number"],
+  select {
     width: 100%;
     padding: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px; /* Adjusted margin */
     border: 1px solid #ccc;
     border-radius: 5px;
-}
+  }
   
-/* Buttons */
-button {
+  /* Buttons */
+  button {
     background-color: #005eff;
     color: white;
     border: none;
@@ -81,23 +82,25 @@ button {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    justify-content: center;
-}
+    width: 100%; /* Ensure buttons take full width */
+    max-width: 200px; /* Set a max-width for buttons */
+    margin: 10px 0; /* Add margin for spacing */
+  }
   
-button:hover {
+  button:hover {
     background-color: #0056b3;
     transform: scale(1.05);
-}
+  }
   
-/* Additional Styling */
-.login-container p {
+  /* Additional Styling */
+  .login-container p {
     margin-top: 20px;
     color: #888;
-}
-
-.login-form {
+  }
+  
+  .login-form {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
+  }
