@@ -7,7 +7,6 @@ import BMRDisplay from './BMRDisplay';
 import './MainPage.css'; // Import the CSS file
 
 const MainPage: React.FC = () => {
-  const [message, setMessage] = useState('');
   const [user, setUser] = useState<{ id: number, firstname: string, email: string, weight?: number } | null>(null);
   const [date] = useState(new Date().toLocaleDateString('en-CA'));
   const [foodEntries, setFoodEntries] = useState<any[]>([]);

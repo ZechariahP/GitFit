@@ -24,7 +24,6 @@ interface ProgressTrackerProps {
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, exerciseEntries, onRemoveFoodEntry, onRemoveExerciseEntry }) => {
   const user_id = useSelector((state: RootState) => state.auth.user?.id);
   const [currentDayEntries, setCurrentDayEntries] = useState<{ foodEntries: FoodEntry[], exerciseEntries: ExerciseEntry[] }>({ foodEntries: [], exerciseEntries: [] });
-  const [message, setMessage] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<Date | null>(null);
@@ -32,12 +31,11 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
   const [pastEntries, setPastEntries] = useState<{ date: string, foodEntries: FoodEntry[], exerciseEntries: ExerciseEntry[] }[]>([]);
   const [user, setUser] = useState<{ id: number, firstName: string, email: string, weight?: number, bmr?: number }>({ id: 0, firstName: '', email: ''});
   const [bmr, setBmr] = useState<number>(0);
-  const [loadingBmr, setLoadingBmr] = useState<boolean>(true);
+
 
   useEffect(() => {
     fetch('http://localhost:5000/api/')
       .then(response => response.text())
-      .then(data => setMessage(data))
       .catch(error => console.error('Error fetching API message:', error));
 
     const userData = localStorage.getItem('user');
@@ -52,11 +50,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
         .then(response => response.json())
         .then(data => {
           setBmr(data.bmr);
-          setLoadingBmr(false);
         })
         .catch(error => {
           console.error('Error fetching BMR:', error);
-          setLoadingBmr(false);
         });
     }
   }, [user]);
