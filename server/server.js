@@ -21,7 +21,7 @@ app.use(express.json());
 // Use API routes
 app.use('/api', apiRouter);
 
-app.use('/', express.static('/public'))
+app.use('/', express.static('public'))
 
 const sql = neon(process.env.DATABASE_URL);
 
