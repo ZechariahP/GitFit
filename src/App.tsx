@@ -5,17 +5,14 @@ import MainPage from './components/MainPage';
 import './App.css';
 
 const App: React.FC = () => {
-  const isAuthenticated = !!localStorage.getItem('user'); // Check if the user is authenticated
 
   return (
     <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/"
-          element={isAuthenticated ? <MainPage /> : <Navigate to="/login" />}
-        />
+      <Routes> 
         <Route path="*" element={<Navigate to="/login" />} /> {/* Redirect to login page by default */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<MainPage />} />
+       
       </Routes>
     </Router>
   );
