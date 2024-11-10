@@ -299,7 +299,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
   // Calculate net calories for the current date
   const currentFoodTotals = calculateFoodTotals(currentFoodEntries);
   const currentExerciseTotals = calculateExerciseTotals(currentExerciseEntries);
-  const calculateNetGainLoss = currentFoodTotals.calories - currentExerciseTotals.caloriesBurned;
+  const calculateNetGainLoss = (currentFoodTotals.calories || 0) - (currentExerciseTotals.caloriesBurned || 0);
 
   
   return (
@@ -309,7 +309,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
         <div>
           <h3>Current Day: {new Date().toLocaleDateString('en-US', { timeZone: 'GMT' })}</h3>
           <h4>Net Gain/Loss</h4>
-          <p>Net Calories: {calculateNetGainLoss - bmr}</p>
+          <p>Net Calories: {calculateNetGainLoss - (bmr || 0)}</p>
               <FoodEntriesTable
                 foodEntries={currentFoodEntries}
                 onRemoveFoodEntry={handleRemoveFoodEntry}
