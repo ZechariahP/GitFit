@@ -6,8 +6,9 @@ body {
   background-color: #f4f4f4;
   color: #333;
   display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
   overflow: hidden; /* Prevent scrolling */
 }
 
@@ -20,8 +21,8 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  flex: 1; /* Ensure the container takes up available space */
-  overflow: auto; /* Allow scrolling within the container if needed */
+  transform: scale(0.75); /* Scale down the content */
+  transform-origin: top center; /* Set the origin for scaling */
 }
 
 /* Header */
