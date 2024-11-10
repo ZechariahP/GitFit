@@ -5,14 +5,12 @@ import MainPage from './components/MainPage';
 import './App.css';
 
 const App: React.FC = () => {
-
   return (
     <Router>
-      <Routes> 
-        <Route path="*" element={<Navigate to="/login" />} /> {/* Redirect to login page by default */}
+      <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<MainPage />} />
-       
+        <Route path="/main" element={<MainPage />} />
+        <Route path="/" element={<Navigate to="/login" />} /> {/* Redirect to login page by default */}
       </Routes>
     </Router>
   );
