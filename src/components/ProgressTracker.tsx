@@ -45,11 +45,11 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ date, foodEntries, ex
   }, []);
 
   useEffect(() => {
-    if (user) {
+    if (user && user.email) {
       fetch(`http://localhost:5000/api/bmr?email=${user.email}`)
         .then(response => response.json())
         .then(data => {
-          setBmr(data.bmr);
+          setBmr(data.bmr || 0);
         })
         .catch(error => {
           console.error('Error fetching BMR:', error);
